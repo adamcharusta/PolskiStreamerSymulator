@@ -40,7 +40,8 @@ jobs:
             exit 1
           }
       - name: Test solution
-        run: dotnet test PolskiStreamerSymulatorApp/PolskiStreamerSymulatorApp.sln -c Release
+        working-directory: PolskiStreamerSymulatorApp
+        run: dotnet test --solution PolskiStreamerSymulatorApp.sln -c Release
       - name: Log in to GHCR
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

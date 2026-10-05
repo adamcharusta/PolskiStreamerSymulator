@@ -1,6 +1,14 @@
 # Testing strategy and project plan
 
-The current solution has no test projects. Create tests alongside the first behavior they verify, rather than adding empty projects only to match the architecture. Use one test framework consistently; **xUnit** is the proposed default because it integrates with `dotnet test` and the other recommended tools. [Microsoft's xUnit guide](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit) shows the basic project setup.
+The solution's first test project is `tests/Server.IntegrationTests`. Create further test projects alongside the first behavior they verify, rather than adding empty projects only to match the architecture. Use one test framework consistently: **xUnit**, through the `xunit.v3` package. [Microsoft's xUnit guide](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit) shows the basic project setup.
+
+## Test platform and commands
+
+Tests run on Microsoft Testing Platform v2, the default of the `xunit.v3` 4.x packages. `PolskiStreamerSymulatorApp/global.json` switches `dotnet test` to its Microsoft Testing Platform mode, and `dotnet` reads that file only when a command runs from `PolskiStreamerSymulatorApp/` or below. Run the tests from that folder:
+
+    dotnet test --solution PolskiStreamerSymulatorApp.sln
+
+In this mode, pass a solution with `--solution` and a single project with `--project`. Running `dotnet test` from the repository root falls back to the VSTest mode, which cannot run these projects. Each test project keeps `Microsoft.NET.Test.Sdk` and `xunit.runner.visualstudio`, as xUnit recommends, so IDE test explorers that still use VSTest can discover the tests. Test projects are executables and set `<OutputType>Exe</OutputType>`.
 
 ## Proposed test projects
 
@@ -12,6 +20,8 @@ The current solution has no test projects. Create tests alongside the first beha
 | `tests/Server.IntegrationTests` | `Server`, `Contracts` | Stateless gameplay HTTP contract, admin authentication and authorization, DI composition, Wolverine handler discovery, error mapping |
 | `tests/BlazorApp.ComponentTests` | `BlazorApp`, `Contracts` | Player and admin component behavior, browser-save adapter, and accessible form feedback with bUnit |
 | `tests/E2E.Tests` | No production project reference required | Browser flow across the hosted app with Playwright for .NET |
+
+`Server.IntegrationTests` exists since work package F1. Add the other projects with the first behavior they verify.
 
 `Domain.Tests` and `Application.Tests` should run on every change. Provider and server integration tests should run in CI and before merging persistence or API changes. Browser E2E tests cover a few critical journeys, not every arithmetic branch. Balance sweeps can live in `Domain.Tests` under a separate trait and run before release or nightly, so a 1,000-seed test does not slow every edit.
 
@@ -93,12 +103,12 @@ Use the actual production database provider for persistence integration tests wh
 
 | Need | Proposed package | When to add |
 | --- | --- | --- |
-| General .NET tests | `xunit`, `xunit.runner.visualstudio`, `Microsoft.NET.Test.Sdk` | First test project |
-| Code coverage | `coverlet.collector` | CI coverage reporting, after useful tests exist |
+| General .NET tests | `xunit.v3`, `xunit.runner.visualstudio`, `Microsoft.NET.Test.Sdk` | Added with `Server.IntegrationTests` |
+| Code coverage | `Microsoft.Testing.Extensions.CodeCoverage`; Coverlet's collector does not run under Microsoft Testing Platform | CI coverage reporting, after useful tests exist |
 | Blazor components | `bunit` | First interactive component with meaningful behavior |
-| Browser journeys | `Microsoft.Playwright.Xunit` | First complete hosted flow |
-| ASP.NET Core integration | `Microsoft.AspNetCore.Mvc.Testing` | Server project exists |
+| Browser journeys | `Microsoft.Playwright.Xunit.v3` | First complete hosted flow |
+| ASP.NET Core integration | `Microsoft.AspNetCore.Mvc.Testing` | Added with `Server.IntegrationTests` |
 | SQLite integration database | `Microsoft.EntityFrameworkCore.Sqlite` with two isolated temporary database files | First catalogue or analytics repository test; run in CI without a database container |
-| Property-based checks | `FsCheck.Xunit` or equivalent | After domain transition API stabilizes |
+| Property-based checks | `FsCheck.Xunit.v3` or equivalent | After domain transition API stabilizes |
 
 Keep packages centrally versioned in `Directory.Packages.props`. Do not add a mocking library by default: hand-written fake repositories and deterministic RNGs are small and make test behavior obvious. Add one only if tests show repeated setup cost. Avoid snapshot tests for numeric game rules; explicit assertions and invariant checks give clearer failures.
