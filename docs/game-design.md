@@ -1,79 +1,67 @@
-# Game design: first playable version
+# Game design: a dice-driven streamer career
 
-All rules here are the proposed MVP contract except the weekly turn and satirical tone, which the creator confirmed. Numeric constants and formulas live in [balance.md](balance.md).
+The creator confirmed an initial 52-week run, one week per turn, satirical Polish-internet tone, **money, viewers, and drama** as the three game statistics, no starting archetypes, event eligibility influenced by all three statistics, and percentage-based consequences for **every choice**. The player chooses **one action at the start of each week**, then may respond to an event. Run length and other numeric defaults are versioned SQL Server parameters; numeric tuning belongs in [balance](balance.md).
 
-## Player fantasy and objective
+## Objective and setup
 
-Build a Polish streaming career from a small channel. There is no single mandatory victory target. A player may pursue reach, a stable livelihood, or a loyal community. The first playable run covers **52 weekly turns** and ends with a career-year recap and a score by dimension. The player can then start a new run; continuation into later years is a future feature.
+Build a fictional Polish streaming career for up to the configured number of weeks, initially 52. Completing the configured final week without bankruptcy ends the career; reaching the bankruptcy limit ends it immediately in defeat. Either ending shows one career score based equally on the final channel audience and net profit earned after expenses, along with final money, the drama path, and notable events. The score compares runs; it does not override the defeat result. Calm, mixed, and controversy-driven careers should produce different stories.
 
-## Setup
+The player chooses a streamer name and may choose a separate channel name. The setup screen suggests a streamer name by joining two SQL Server vocabulary parts; the suggestion can be regenerated or replaced with the player's own name. Name choice has no game effect. See [streamer name generation](streamer-name-generation.md). A content theme may be chosen for flavor and event eligibility, but must not grant archetype-like starting bonuses. There are **no archetypes**.
 
-The player enters a display name and channel name, chooses a content focus and one of three archetypes, then starts a run. The focus provides flavor and event eligibility without a permanent optimal choice. Archetypes create modest, visible starting differences:
+## Persistent game state
 
-| Archetype | Strength | Cost |
+| Field | Meaning | Rule |
 | --- | --- | --- |
-| Entertainer | Stronger discovery from energetic content | Workload drains more energy |
-| Expert | Higher content quality and sponsor fit | Slower early audience discovery |
-| Community builder | Greater loyalty and recovery | Smaller viral spikes |
+| Week | Current week | Starts at 1; the initial published run ends after week 52, later versions may configure another length |
+| Money | Available PLN | Starts at 1,500 in the first published parameters; integer; changes only through categorized cash-flow entries; initially a balance at or below -1,000 ends the run in defeat |
+| Viewers | Size of the channel's regular audience | Starts at 20 in the first published parameters; non-negative integer; there is no separate follower or average-live-viewer score |
+| Drama | Public controversy level | Starts at 50 in the first published parameters; integer 0–100; low is calmer, high is more controversial |
+| Run history | Completed choices, rolls, events, and effects | Stored in the browser save, not the event database |
+| RNG, rules, and catalogue versions | Reproducible chance and stable algorithms, parameters, and event rules | Stored in the browser save |
 
-The UI explains these trade-offs before confirmation. Names are game data and must follow the chosen save-location and privacy rules.
+Money, viewers, and drama are the only core numeric game statistics. A description such as “damaged reputation” must translate into changes to these statistics; do not silently reintroduce reputation, trust, energy, equipment level, or a moral score. Temporary flags such as an event cooldown or a one-time milestone are rule state, not extra player-facing statistics.
 
-## Persistent state
+## Money and weekly settlement
 
-| Metric | Meaning | Range / unit |
-| --- | --- | --- |
-| Week | Current turn in the career year | 1–52 |
-| Followers | Cumulative channel audience | Non-negative integer |
-| Average viewers | Estimated live viewers this week | Non-negative integer; derived from audience and week performance |
-| Cash | Available money after payouts and costs | Whole PLN; can be negative until an ending check |
-| Energy | Ability to produce consistently | 0–100 |
-| Community trust | How willing viewers are to return | 0–100 |
-| Reputation | Public and sponsor perception | 0–100 |
-| Equipment | Production capability | Level 1–5 |
-| Career log | Choices, event, results, and metric deltas | One entry per completed week |
+The player has one money balance. Each change to it is recorded in one of four cash-flow categories: **sponsors, donations, subscriptions, or expenses**. Sponsors, donations, and subscriptions add money; expenses subtract it. The weekly report shows these four subtotals and the net change. They are a breakdown of money, not four additional game statistics.
 
-Followers do not directly equal viewers. Trust affects repeat viewing; reputation affects partnership opportunities; energy affects output quality. Cash is a resource, not a score by itself. No metric should become a hidden requirement for continuing a run.
+Subscription revenue is settled **once every week**, including a quiet week, using the run's post-action viewers and versioned rules. There is no separate active-subscriber count in the first version. The proposed amount formula is in [balance](balance.md). Sponsor and donation income occurs through applicable weekly-action or event outcomes. Guaranteed action costs, automatic encounter costs, paid event responses, and random bills are recorded as **separate expense entries**. An outcome can create several entries, for example sponsor income plus a production expense.
+
+The invariant is `closingMoney = openingMoney + sponsors + donations + subscriptions - expenses`, with each subtotal shown as a non-negative PLN amount. Store the underlying signed entries and their source IDs in the browser save so a report can explain a change and a retry cannot pay the same entry twice.
+
+Drama is a **position in public perception**, not a simple health bar. Low drama can unlock calm or cooperative situations, middle drama mixed ones, and high drama scandals and provocative opportunities. Some choices can gain viewers while increasing drama or gain money while losing viewers. The game should not automatically reward the lowest or highest drama in every situation.
 
 ## Weekly loop
 
-1. **Plan:** Show current state, last report, and a plain-language forecast for the selected choices.
-2. **Choose format:** Gaming, just chatting, challenge/IRL, or tutorial/commentary. Each favors different archetypes and event types.
-3. **Choose workload:** Break (0 live hours), regular (8 hours), or intensive (20 hours). A break is a meaningful recovery choice and can still incur costs and audience drift.
-4. **Optional action:** No action, community outreach, promotion, or equipment upgrade. Only actions whose cost is affordable are enabled; their costs and effects are visible. A break may still include community outreach but not promotion of a nonexistent stream.
-5. **Resolve:** Apply the documented calculations in a fixed order and draw at most one random event. If an event needs a decision, stop at its choice screen before committing the week. Then calculate the final state, create a report, and advance the week.
-6. **Review:** Show the result, causes of major changes, event outcome, and updated career history. The next turn starts only after review.
+1. Show the week, three statistics, recent events, and the available choices.
+2. The player chooses **one weekly action**. Candidate actions for the first prototype are an ordinary stream, a provocative stunt, a commercial/promotion attempt, and a quiet week. These names and the final menu are **proposals**, not confirmed rules. Every offered action shows its cost and an honest summary of possible consequences.
+3. Record any guaranteed action cost as an expense, then resolve the action using recorded percentage chances and one seeded dice roll. The result can add categorized cash flows and change viewers or drama. Settle this week's subscription income once after the action. All uncertain consequences have explicit probabilities. If the balance is now at or below the bankruptcy limit, finish in defeat without checking events.
+4. Check which events are eligible using the resulting money (including the weekly subscription payout), viewers, drama band, week, and any narrative flags. Roll for an encounter and show at most one event during the week. If the selected event has an **automatic encounter cost**, record it as an expense before showing the event. If this reaches the bankruptcy limit, finish in defeat without offering event responses. Other eligible events do not charge anything.
+5. Otherwise, the player chooses an event response. Record any **additional response cost** as another expense, roll once against that response's weighted outcomes, apply exactly one result, show its categorized money changes and other effects, then complete the week. If the balance reaches the bankruptcy limit, finish in defeat. A week may have no event if no definition passes its encounter roll.
+6. Save the completed week in the browser and show a report before the next turn. If an event is pending, save the pending state before showing its choices. If any checkpoint caused bankruptcy, save the terminal state and show the defeat recap instead of a next-turn action.
 
-The player can return to planning before confirming the week. Once the week is committed, there is no undo within the run; loading an earlier manual save is allowed. Prevent double submission while resolution is in progress.
+Every player decision with uncertain consequences has a probability distribution. A “safe” choice may have a high chance of a modest result, while a risky choice may offer a larger upside and a meaningful downside. The final outcome is not chosen by the UI. The exact weekly action menu and odds will be tuned through the first playable slice.
 
-## Format identity
+## Events and choices
 
-| Format | Expected upside | Expected downside |
-| --- | --- | --- |
-| Gaming | Reliable baseline and gradual loyalty | Modest discovery without a standout event |
-| Just chatting | Strong community connection | Reputation risk when energy is low |
-| Challenge/IRL | High discovery potential | Higher effort and event volatility |
-| Tutorial/commentary | Strong credibility and long-tail growth | Slower immediate reach |
+Events have typed conditions, including a **calm**, **middle**, or **high-drama** band, minimum/maximum viewers, and minimum/maximum money. An event can target one band or several. The authored catalogue should contain events specifically for each band and events available across bands. Eligibility is checked before an encounter roll. Choice outcomes have separate percentage chances; seeing an event does not imply its risky result will happen.
 
-Formats are fictional abstractions. A player can change format weekly. The initial rules do not reward repetition by itself; format choice matters through its modifiers, side effects, and eligible events. Add a specialization or novelty mechanic only after playtests show it would create a useful choice.
+Both cost types are optional. An automatic encounter cost is unavoidable once that event is selected and may put money below zero or trigger bankruptcy; authoring conditions can restrict an event if that would be unfair. A paid response is offered only when affordable from the **post-encounter-cost** balance, and every event that survives its encounter cost must retain at least one free, selectable response. The encounter cost and response cost are displayed separately and applied at most once, including when a pending-event request is retried.
 
-## Weekly resolution and events
+The content target is **at least 200 distinct events**. This is a later content-production milestone, not a requirement to handwrite 200 events before implementing the engine. The initial documentation contains [20 draft examples](sample-events.md); a small, representative subset covering each drama band, viewer threshold, money threshold, and outcome shape is enough for the first playable slice. Each event needs stable IDs, Polish text, at least two meaningful responses, explicit probabilities, and effects using only the three statistics. See [event system](event-system.md) and [event catalogue](event-catalogue.md).
 
-The rules engine receives current state, choices, and a seeded random source. It validates choices, calculates baseline content performance, resolves any event choice, then updates audience, cash, energy, trust, and reputation. The report stores both numerical deltas and reason codes so the UI can explain results. The event selection rules and numeric order are in `balance.md`.
+Example design theme: a fan sends a private message. Responses include ignoring it, replying politely, or flirting. A reply may lead to a pleasant adult interaction, an impersonator publishing the messages, or an age concern that ends contact immediately. The consequences are expressed as viewer, money, and drama changes. The story does not develop romantic or sexual content involving a minor, and impersonation is the harmful act rather than a person's gender presentation. This is a design example; exact copy, odds, and effects require content review.
 
-Event themes include a clip spreading beyond the channel, a community in-joke, equipment trouble, a useful collaboration, a mismatched sponsor offer, a moderation problem, a creator feud parody, a charity opportunity, an algorithm change, and a creative slump. An event must offer an understandable option when it changes more than one core metric. The player must never be forced into a harmful event choice with no alternative.
+## Progression and ending
 
-## Opportunities and progression
+The creator confirmed an **automatic defeat at a balance of -1,000 PLN or less** for the initial published parameters, including exactly -1,000 PLN. The threshold is a typed, versioned field in the shared SQL Server game catalogue; an active run keeps its published catalogue version. Check the balance after each atomic step: (1) the weekly action, its rolled outcome, and that week's subscription settlement together; (2) a selected event's automatic encounter cost; (3) the chosen response's guaranteed cost and rolled outcome together. Cash entries inside a step reconcile before the check, so their order cannot change the ending. Once defeated, no more choices, event rolls, or weekly settlements occur. If bankruptcy happens during the configured final week, defeat takes precedence over ordinary completion.
 
-Follower milestones at 100, 1,000, and 10,000 unlock flavor, stronger opportunities, and recap badges. They do **not** lock basic play. Sponsor offers require sufficient audience and reputation; an offer states its immediate cash reward and possible trust cost. Equipment upgrades consume cash and persist for the rest of the run. A negative week can be recovered through lighter workload, community action, or a different format.
+Both the configured-final-week and defeat recaps show the single career score, its audience and net-profit components, money ledger totals, drama path, and choices made. The defeat recap is clearly labelled as a loss even if its score is high. Net profit excludes that run's pinned starting balance, initially 1,500 PLN; drama has no direct score bonus or penalty. The formula and provisional reference values are in [balance](balance.md). Viewer milestones can create one-time story beats and unlock higher-reach events; their thresholds are proposed until audience growth is tuned. Do not add an invented reputation or community score.
 
-## Endings and score
+## Information and fairness
 
-The run ends after week 52. It may also end early if cash stays below the debt floor for four consecutive weeks, representing a channel that can no longer cover costs. A break or low energy does not itself cause a game over. The final recap shows the path across all weeks, key events, and three separate ratings: reach, sustainability, and community. It highlights the player's strongest dimension; it does not collapse all strategies into one supposedly best number. The early ending should offer a clear explanation and replay.
-
-## Information rules
-
-- Show costs and direct effects before the player confirms a choice.
-- Show approximate reach and energy forecasts as ranges, because events and discovery vary.
-- Explain changes after resolution with readable reason codes, never only a raw number.
-- Keep random outcomes bounded. A single roll should not wipe out an otherwise healthy career.
-- Allow multiple viable routes through playtests rather than tuning solely for maximum followers.
+- Show guaranteed costs, possible outcomes, and their percentages before confirmation. Do not hide a severe result behind a vague “small risk” label.
+- Use a seeded, versioned random algorithm so the same state, catalogue, and choices produce the same outcome.
+- Apply one outcome per choice and record the roll, outcome ID, and numeric deltas. Retries must not roll again.
+- Keep losses bounded so a single unlucky event does not erase a healthy run without a clear, deliberately accepted risk.
+- Let calm, mixed, and controversial paths all produce interesting events and viable endings. Human playtests decide whether those paths feel different and fair.

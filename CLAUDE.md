@@ -8,9 +8,12 @@ The key specifications are:
 - `docs/game-design.md` — player experience and gameplay rules.
 - `docs/balance.md` — provisional numeric model and balancing method.
 - `docs/event-catalogue.md` — event conditions, choices, and effects.
-- `docs/event-system.md` — SQLite event content, probabilities, and publishing rules.
+- `docs/sample-events.md` — twenty draft event examples and provisional outcomes.
+- `docs/streamer-name-generation.md` — SQL Server name vocabulary, suggestions, and custom entry.
+- `docs/event-system.md` — SQL Server weekly actions, events, typed game parameters, name-part schema, probabilities, and publishing rules.
 - `docs/experience-and-content.md` — screens, tone, accessibility, and content rules.
 - `docs/technical-design.md` — .NET 10, CQRS project graph, server design, and persistence boundary.
+- `docs/observability-and-analytics.md` — logging, operational metrics, aggregate gameplay counters, and privacy safeguards.
 - `docs/testing-strategy.md` — test projects, cases, and tools.
 - `docs/library-guide.md` — package choices and adoption timing.
 - `docs/delivery-plan.md` — implementation order and acceptance criteria.

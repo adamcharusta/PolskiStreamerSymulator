@@ -9,9 +9,12 @@ This file is a navigation map for contributors and coding agents. The authoritat
 | Player journey, turn sequence, mechanics, ending, and MVP rules | `docs/game-design.md` |
 | Starting numbers, formulas, event weights, and balance targets | `docs/balance.md` |
 | Event eligibility, choices, and effects | `docs/event-catalogue.md` |
-| SQLite event schema, dice rolls, versioning, and authoring | `docs/event-system.md` |
+| Twenty draft event examples and their provisional odds | `docs/sample-events.md` |
+| Streamer name suggestions, custom names, and vocabulary rules | `docs/streamer-name-generation.md` |
+| SQL Server weekly actions, events, typed game parameters, name-part schema, dice rolls, versioning, and authoring | `docs/event-system.md` |
 | Screens, Polish copy conventions, accessibility, and content boundaries | `docs/experience-and-content.md` |
 | Stack, architecture, state schema, saves, and quality gates | `docs/technical-design.md` |
+| Server and client logging, operational metrics, aggregate gameplay analytics, and data handling | `docs/observability-and-analytics.md` |
 | VPS, k3s, Ansible, GitHub Actions, TLS, backups, and rollout | `docs/deployment.md` |
 | Test project layout, test cases, and tools | `docs/testing-strategy.md` |
 | Optional .NET libraries and when to add them | `docs/library-guide.md` |

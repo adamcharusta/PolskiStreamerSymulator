@@ -25,7 +25,6 @@
           - ca-certificates
           - curl
           - fail2ban
-          - sqlite3
           - ufw
           - unattended-upgrades
         state: present
@@ -252,7 +251,6 @@
       loop:
         - storageclass.yaml
         - namespace.yaml
-        - pvc.yaml
         - service.yaml
         - redirect-https.yaml
 
@@ -272,7 +270,6 @@
       loop:
         - storageclass.yaml
         - namespace.yaml
-        - pvc.yaml
         - service.yaml
         - redirect-https.yaml
         - issuer.yaml

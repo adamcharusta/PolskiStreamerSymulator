@@ -1,37 +1,48 @@
-# MVP event catalogue: rules specification
+# Event catalogue: authoring contract and first example
 
-This is the initial rules catalogue for 12 events. All titles and descriptions below are **English design labels**, not final player-facing copy. Write original Polish prompts, option labels, and report text during content production. The numeric effects and per-event occurrence chances are tuning hypotheses governed by [balance](balance.md) and the [SQLite event system](event-system.md).
+The content target is **at least 200 original events** over time. The first documentation pass now has [20 draft sample events](sample-events.md) to illustrate conditions, costs, choices, and weighted outcomes; they are not approved or imported into SQL Server. The former twelve-event table was based on retired energy, trust, reputation, follower, and equipment statistics and is no longer a valid implementation specification.
 
-## Shared event rules
+## Authoring rules
 
-- Roll for events only after baseline weekly results and format effects. A milestone notification takes precedence over a random event that week.
-- Each eligible event makes its own occurrence roll using the chance in the table and has a 4-week cooldown after it appears. If several pass, choose one uniformly using the saved PRNG state.
-- A trigger referring to followers, trust, reputation, cash, equipment, or energy uses the state **after baseline resolution and before event effects**.
-- Apply the selected option once, clamp followers at zero and bounded stats to 0–100, then record event ID, option ID, and numeric deltas. Cash can be negative under the debt rules.
-- `+N followers` means an additive change, capped at `min(N, round(0.1 × followers + 100))`; losses cannot reduce followers below zero. A cost requiring cash is selectable only when the pre-event cash is at least that cost.
-- Every event must always have at least two selectable options. If an option becomes unaffordable, provide the listed free alternative.
+Every event definition needs:
 
-| ID | Event and eligibility | Occurrence chance | Option A | Option B |
-| --- | --- | ---: | --- | --- |
-| `clip_spread` | Unexpected clip; any streamed week | 5% | Share it widely: 70% `+60 followers, -2 trust`; 30% `+10 followers, -2 trust` | Let it circulate naturally: +25 followers, +2 trust |
-| `community_joke` | Community in-joke; streamed week, trust ≥45 | 5% | Make it a recurring segment: +4 trust, -3 energy | Keep the show broad: +30 followers, -1 trust |
-| `audio_fault` | Audio failure; streamed week, equipment <3, cash ≥100 PLN | 4% | Repair it: -100 PLN, +1 reputation | Work around it live: -2 reputation, +2 trust |
-| `viewer_suggestion` | Viewer suggestion; any streamed week | 5% | Try it: +35 followers, -4 energy | Stay with the plan: +2 trust, +1 reputation |
-| `collaboration_invite` | Collaboration; streamed week, followers ≥100 | 3% | Join: +70 followers, -5 energy | Decline politely: +2 reputation, +2 energy |
-| `awkward_sponsor` | Mismatched sponsor; streamed week, followers ≥1,000, reputation >40 | 2% | Accept: +300 PLN, -5 trust, -2 reputation | Decline: +3 trust, +1 reputation |
-| `good_sponsor` | Suitable sponsor; streamed week, followers ≥1,000, trust >55 | 2% | Accept: +200 PLN, -1 energy | Ask for a community perk: +100 PLN, +3 trust |
-| `moderation_issue` | Chat moderation problem; streamed week, followers ≥100 | 4% | Address it: -5 energy, +3 trust | Ignore it: -4 trust, -2 reputation |
-| `creator_spat` | Creator spat parody; streamed week, reputation >30 | 3% | Reply publicly: +50 followers, -4 reputation | Step away: +2 reputation, +2 energy |
-| `charity_invite` | Charity opportunity; any week, cash ≥100 PLN | 3% | Contribute: -100 PLN, +4 trust, +2 reputation | Postpone: no direct metric change |
-| `algorithm_shift` | Discovery changes; any streamed week | 4% | Adapt this week: +40 followers, -5 energy | Keep the channel familiar: +2 trust, -15 followers |
-| `creative_slump` | Creative slump; energy <35 | 5% | Lighten this week: +8 energy, -10 followers | Push through: +20 followers, -6 energy |
+1. A stable ID, Polish title, setup text, and optional content tags.
+2. Typed eligibility rules for drama band, viewers, money, week, and any small set of approved narrative flags. An event can be calm-only, middle-only, high-drama-only, or available across bands.
+3. An encounter chance, cooldown, and optional **automatic encounter cost**. Eligibility is checked before the encounter roll; multiple successful events are resolved by a stable, seeded selection rule. Only the selected event charges its encounter cost.
+4. At least two responses with Polish labels and an honest preview. Each response has at least two meaningfully distinct weighted outcomes; weights sum to 100%. An optional response cost is shown separately from the already charged encounter cost. If the encounter cost has not ended the run at the bankruptcy limit, at least one response remains free and selectable.
+5. Result text and effects using **money, viewers, and drama only**. Any money effect must be a categorized sponsor/donation/expense entry; the weekly subscription payout is handled once by the weekly rules. A result may move more than one statistic. Severe outcomes need an understandable warning and a safer alternative.
+6. Review for originality, grammar, gender-flexible player copy, and consistency with [experience and content](experience-and-content.md).
 
-The `creative_slump` event's first option is immediate recovery in the MVP; it does not silently change the following week's selected workload. The `charity_invite` can appear on a break week and must describe an off-stream contribution.
+Event conditions and outcomes are stored in SQL Server as described in [event system](event-system.md). A published version is immutable so an active browser save can finish against the same rules.
 
-## Milestone notifications
+## Design example: a private message from a fan
 
-Crossing 100, 1,000, or 10,000 followers produces a one-time notification and badge. It has no numeric effect. Store the unlocked milestone ID so a later drop in followers does not repeat it. If baseline growth crosses a milestone, show the notification instead of drawing a random event. If a random event pushes the total over a milestone, include the badge in that event's report without showing a second event card. If multiple milestones are crossed at once, show the highest one and record all crossed IDs in the weekly report.
+This example captures the creator's intended shape of an event. The numbers below are **illustrative tuning values**, not approved final content. The final Polish copy will be written during content production.
 
-## Content acceptance criteria
+| Field | Example |
+| --- | --- |
+| ID | `fan_private_message` |
+| Eligibility | Viewers at least 20; any drama band; no same-event encounter in the last four weeks |
+| Encounter chance | 5% on an eligible week |
+| Automatic encounter cost | 0 PLN for this example; other events may have one |
+| Response 1 | Ignore the message |
+| Response 2 | Reply politely without flirting |
+| Response 3 | Flirt, accepting a clearly displayed higher risk |
 
-Every card needs concise Polish setup text, option labels, exact cost text, risk preview, and two result variants that match the rules. Review satire for clarity and for the boundaries in `experience-and-content.md`. Ensure the same event reads sensibly for every eligible content format and for a character of any gender.
+| Response | Illustrative outcome distribution | Effects |
+| --- | --- | --- |
+| Ignore | 90% nothing develops; 10% the fan comments publicly on being ignored | `0` or `-2 viewers, +1 drama` |
+| Reply politely | 70% pleasant exchange with a verified adult; 20% no lasting effect; 10% screenshots appear out of context | `+8 viewers, -1 drama`; `0`; or `+5 drama` |
+| Flirt | 55% pleasant exchange with a verified adult; 25% an impersonator leaks the chat; 20% age cannot be verified and contact ends immediately | `+12 viewers, -2 drama`; `-8 viewers, +20 drama`; or `-15 viewers, +30 drama` |
+
+The event does not develop romantic or sexual content involving a minor. The impersonation outcome treats deception and publishing private messages as the problem; it does not make gender presentation the punchline. “Reputation loss” in story language maps to viewer and drama deltas because there is no reputation statistic.
+
+For a cost-bearing example, a cancelled venue could charge a **60 PLN encounter expense** when selected. The player could then choose a free home-stream response or a replacement venue response with an **additional 40 PLN guaranteed expense**. The response still rolls for its outcome; if the paid response wins 150 PLN from a sponsor, that result creates a separate sponsor-income entry. The three entries remain distinct in the report. These amounts and story details are illustrative, not published content.
+
+## Build the catalogue in stages
+
+- **Engine fixture:** a few events spanning calm, middle, and high drama, including viewer and money thresholds, an unaffordable option, and two- and three-outcome responses.
+- **First playable content set:** start from the 20 draft examples in [sample events](sample-events.md), review and import a representative subset, then expand if a 52-week test run repeats situations too often. Twenty examples are a documentation milestone, not a promise that 20 published events provide enough variety.
+- **Long-term target:** at least 200 reviewed events, distributed across drama bands and audience/wealth stages. Track eligibility and encounter counts so adding events does not unintentionally make one band much busier than another.
+
+No event in this document is automatically approved for publication; final odds, deltas, copy, and content boundaries need review and seeded balance tests.

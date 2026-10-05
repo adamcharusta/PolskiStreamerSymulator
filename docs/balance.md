@@ -1,73 +1,107 @@
-# Balance model: initial tuning hypothesis
+# Balance model: three statistics and weighted outcomes
 
-These numbers are **provisional**, intended to make an MVP implementable and testable. They are not claims about real streaming platforms or real income. Change them after simulation and playtests, then update this document.
+The creator confirmed the three-statistic model, initial starting values, bankruptcy threshold, and dice-driven decisions. Exact odds, viewer growth, and income remain **provisional** until simulation and playtests. The numeric values below are the **first published defaults in SQL Server `GameParameters`**; changing them later creates a new catalogue version for new runs. The Domain code owns the formulas and invariants. All chance weights use basis points (`10,000 = 100%`) and sum to 10,000 for each choice.
 
-## Initial state and bounds
+## Starting values and bounds
 
-| Metric | Default | Bounds |
-| --- | ---: | ---: |
-| Followers | 20 | 0 or more |
-| Cash | 1,500 PLN | No upper cap; debt floor at -500 PLN |
-| Energy | 75 | 0–100 |
-| Community trust | 50 | 0–100 |
-| Reputation | 50 | 0–100 |
-| Equipment | 1 | 1–5 |
-| Average viewers | 1 | 0 or more |
-
-Archetype modifiers should be small: no more than 10% on a formula or 5 points on a starting 0–100 metric. Start screen previews the actual modifiers. This avoids an archetype determining the outcome by itself.
-
-## Workload and action table
-
-| Workload | Live hours | Base quality modifier | Energy change before event |
-| --- | ---: | ---: | ---: |
-| Break | 0 | No content | +18 |
-| Regular | 8 | 1.00 | -5 |
-| Intensive | 20 | 1.25 if starting energy ≥30; 0.50 otherwise | -18 |
-
-| Optional action | Cost | Immediate effect |
+| Statistic | Start | Bound / interpretation |
 | --- | ---: | --- |
-| None | 0 PLN | None |
-| Community outreach | 0 PLN | +3 trust, -3 energy |
-| Promotion | 80 PLN | +20% discovery for this week's content |
-| Equipment upgrade | `250 × current equipment level` PLN | +1 equipment level, maximum 5; no same-week quality bonus |
+| Money | 1,500 PLN | Integer; debt is allowed above -1,000 PLN; at or below -1,000 PLN the run ends in defeat |
+| Viewers | 20 | Non-negative integer; the channel's regular audience |
+| Drama | 50 | Integer 0–100; 50 is neutral |
 
-Upgrade and promotion require enough cash **at planning time**. Community outreach is available during a break. A break cannot include promotion. Weekly fixed costs are 15 PLN, including break weeks.
+The first `RunLengthWeeks` is **52**. The server and UI read it from the run's pinned parameters; they do not treat week 52 as a permanent code constant. The first starting money, viewers, and drama values are likewise read from that row. The [SQL Server game catalogue](event-system.md) lists every typed configurable field and its validation.
 
-## Resolution order and formulas
+The previous draft's one average live viewer, energy, trust, reputation, and equipment level are retired. Do not implement them as hidden replacement statistics. For first-pass event eligibility, **provisional** bands are 0–33 calm, 34–66 middle, and 67–100 high drama; the first two upper boundaries come from the pinned `GameParameters` row. An event can target one or more bands and add money/viewer requirements. Clamp viewers at zero and drama to 0–100 after each completed outcome. Money has no arbitrary upper cap.
 
-Use a seeded PRNG. Round final integer metrics once per stage, not after each multiplier. Clamp bounded metrics after all changes within a stage. Use this order:
+## Bankruptcy limit
 
-1. Validate the input and pay optional-action cost.
-2. Apply workload and action energy/trust changes, but calculate this week's content quality using **energy at the start of the week**.
-3. If streaming, compute `quality = clamp(0.2, 1.2, 0.2 + startEnergy / 100 + 0.05 × (equipment - 1)) × workloadModifier × archetypeModifier × formatModifier`. The intensive-workload modifier falls to 0.50 below 30 starting energy, so breaks matter.
-4. Compute discovery `base = (4 + sqrt(startFollowers) × 1.5) × quality × promotionModifier`; multiply by a seeded noise factor in `[0.85, 1.15]` and apply the soft ceiling below. The resulting new followers are `max(0, round(base))`. A break has `newFollowers = 0` and loses `max(0, round(startFollowers × 0.005))` followers.
-5. Estimate average viewers as `max(0, round(endFollowers × (0.02 + trust / 2500) × quality))`. On a break, average viewers are 0. This is the weekly stream metric, not a persistent moving average.
-6. Compute baseline income as `round(averageViewers × liveHours × 0.12)` PLN. Apply sponsor or event cash separately. Subtract the 15 PLN weekly fixed cost.
-7. Apply format side effects. Check milestones using this week's new follower total, then resolve at most one event and its chosen outcome. Apply event metric deltas, clamp energy/trust/reputation, then record the full report.
-8. Update the consecutive-debt counter using the resulting cash. End the run if it reaches four weeks with cash below -500 PLN. Otherwise advance to the next week or annual recap.
+The initial `BankruptcyThresholdPln` is **-1,000**. Under that first published version, a run remains active at -999 PLN and ends in defeat at -1,000 PLN or any lower balance. This is a signed, typed field in `GameParameters`, not a player balance or an event definition. Active runs keep the value associated with their pinned catalogue version. The exact settlement checkpoints and loss priority are in [game design](game-design.md).
 
-`formatModifier` starts at 1.00 for gaming, 0.95 for just chatting, 1.15 for challenge/IRL, and 0.90 for tutorial/commentary. Format side effects after a streamed week: gaming +1 trust; just chatting +2 trust and -1 reputation when starting energy is below 30; challenge/IRL -3 extra energy; tutorial/commentary +1 reputation. These are starting values, not realism claims.
+Treat the weekly action, its rolled outcome, and the regular subscription settlement as one atomic balance check. Then check again after a selected event's automatic encounter cost, and after a response's cost plus rolled outcome. A threshold crossing inside a multi-entry atomic step does not cause defeat if the step's reconciled closing balance recovers above the limit. Once a checkpoint ends the run, later steps do not occur. Preserve all completed ledger entries in the defeat recap.
 
-There is a **soft discovery ceiling**: above 10,000 followers, divide new followers by `1 + (startFollowers - 10000) / 10000`. The ceiling slows runaway growth while leaving milestone events meaningful. Events may exceed the ordinary weekly gain but should be bounded to at most 10% of current followers plus 100 followers in one week.
+## Percentage-roll contract
 
-## Random events
+1. Validate that a weekly action or event response is available and its guaranteed money cost is affordable when selected. An automatic event encounter cost is unavoidable after that event is selected and may create debt.
+2. Record any stated weekly-action or response cost as an expense and subtract it once before that choice's outcome roll. A cost is not a random consequence.
+3. Read the choice's immutable, ordered outcomes. Their `ChanceBps` values must sum to exactly 10,000; each value is an integer from 0 to 10,000.
+4. Consume one value in `[0, 9999]` from the saved seeded PRNG. Select the outcome whose cumulative interval contains that value. Apply its categorized cash-flow entries and viewer/drama deltas once.
+5. Record the pre-choice state, choice ID, roll, outcome ID, cash-flow entries, and actual deltas in the report and browser save. A retry with the same state and choice returns the same result.
 
-- Every week, first check deterministic milestone events. If none takes the event slot, roll once for **each eligible, off-cooldown event** using its `OccurrenceChanceBps` from the published SQLite catalogue. If several pass, select one uniformly. Show at most one event total. See [event system](event-system.md).
-- Random events use their own eligibility and a 4-week cooldown per event ID in the initial catalogue. If no event passes its roll, the week remains ordinary. The first-week aggregate chance is targeted at roughly one event in four weeks, but the exact rate varies with eligibility and catalogue content.
-- A standard event outcome should stay within ±8 energy, ±5 trust, ±5 reputation, and ±150 PLN. Exceptional sponsor or milestone events may exceed cash by a documented amount.
-- Store the event ID, roll-relevant seed state, selected option, and resulting deltas in the career log.
-- A format must have at least one positive and one negative eligible event. No event may permanently remove a core action in the MVP.
+## Cash-flow accounting
 
-## Score and tuning targets
+| Category | Direction | Source |
+| --- | --- | --- |
+| Sponsors | Income | Sponsor deal from a weekly action or event outcome |
+| Donations | Income | Viewer donation from a weekly action or event outcome |
+| Subscriptions | Income | One weekly settlement, including quiet weeks |
+| Expenses | Outflow | Guaranteed choice cost, operating bill, or event loss |
 
-The recap displays raw numbers plus three 0–100 scores. Proposed first formulas: reach = `round(100 × log(1 + followers) / log(10001))`, capped at 100; sustainability = `clamp(0, 100, round(50 + (endCash - startCash) / 50 - 10 × totalDebtWeeks))`; community = `round((trust + reputation) / 2)`. These are presentation summaries, not hidden modifiers to play. Tune the curves after playtests without changing the recorded raw metrics.
+Each cash-flow entry has a category, positive magnitude in whole PLN, signed effect on money, week, and source action/event/outcome ID. A result may contain several entries. No outcome can mutate money without one of these entries. Subtotals are non-negative; expenses are subtracted when calculating net money.
 
-Initial balance targets for 1,000 seeded automated runs per common strategy:
+Illustration: opening money 1,500 PLN, sponsors 200 PLN, donations 35 PLN, subscriptions 18 PLN, and expenses 60 PLN yields closing money **1,693 PLN**. These numbers are a ledger example, not approved payouts.
 
-- Median 52-week run reaches at least 100 followers without requiring lucky events.
-- A regular-workload strategy can finish the year without debt if the player avoids expensive upgrades.
-- Intensive workload grows faster early but has worse energy unless the player schedules breaks.
-- No single archetype, format, or optional action wins all three recap dimensions across most seeds.
-- Early bankruptcy is possible through sustained overspending but rare under ordinary play.
+Settle subscription revenue once per week **after** the weekly action and **before** event eligibility. The proposed first formula is deliberately simple and deterministic:
 
-If these targets fail, change the smallest relevant constants and rerun the same seeds. Also conduct human playtests: numeric variety alone does not prove that choices feel meaningful.
+```text
+weeklySubscriptionsPln = floor(max(0, postActionViewers) / SubscriptionViewersPerPln)
+```
+
+| Post-action viewers | Weekly subscriptions |
+| ---: | ---: |
+| 0 | 0 PLN |
+| 20 (starting audience) | 2 PLN |
+| 100 | 10 PLN |
+| 250 | 25 PLN |
+| 1,000 | 100 PLN |
+
+The first published `SubscriptionViewersPerPln` is **10**, which produces the example table. Record that amount once as a subscription-income ledger entry, including on a quiet week. It is an abstract audience-based payout, not a separately simulated number of paying subscribers. There is no extra subscription dice roll or direct drama multiplier; weekly choices and events already affect future payments through viewers. An event later in the same week cannot retroactively change the amount just settled. Pin the divisor through the catalogue version and the formula algorithm through the code rules version; tune the divisor against full-run income and expense distributions. This formula and its first divisor are **proposed**, not creator-confirmed.
+
+When an event is selected after its encounter rolls, record any `EncounterCostPln` as one expense **before** presenting responses and save that paid state. Charge no cost for merely eligible or unselected events. Assess response affordability after this deduction; the event must still offer a free response. A selected response may have its own `GuaranteedCostPln`, charged once before its outcome roll. An outcome may add a further expense if that is the rolled consequence. These three expense sources need distinct IDs in the saved ledger so retries cannot double-charge them.
+
+Example only: a cautious response could have 80% for a small positive outcome and 20% for no change; a risky response could have 25% for a large viewer gain, 50% for a modest result, and 25% for a drama spike. These percentages are illustrations, **not approved event data**. Serious negative results need a clear risk preview and an alternative response.
+
+An event's **encounter chance** is distinct from each response's **outcome chance**. Check eligibility first, roll the encounter chance for eligible events in stable ID order, select at most one passed event, then roll only the response the player actually chooses. The exact overall encounter frequency is a tuning target, not a fixed “one event per four weeks” rule.
+
+## Final score
+
+The **single career score** uses only the channel audience at the end of the run and the **net profit earned during that run**. Drama has no direct score term; it can still influence which events appear and therefore change audience or profit indirectly. The first 1,500 PLN starting balance is capital, not earnings. Calculate profit from the full ledger, including every guaranteed cost and rolled expense, using the pinned starting balance:
+
+```text
+netProfitPln = totalSponsors + totalDonations + totalSubscriptions - totalExpenses
+             = finalMoneyPln - StartingMoneyPln
+```
+
+Negative profit is allowed and lowers the score. The creator confirmed equal **50% / 50% weighting** for audience and profit. To put viewers and PLN on comparable scales without a hard point ceiling, use the following **provisional scoring curve**. Its initial SQL Server references are 1,000 viewers, 5,000 PLN net profit, and 500 points per component. Verify these values through 52-week simulations. Pin the values to the catalogue version and the formula algorithm to the code rules version.
+
+```text
+audiencePoints = roundAwayFromZero(ScorePointsPerComponent × sqrt(finalViewers / ScoreAudienceReferenceViewers))
+profitPoints   = sign(netProfitPln) × roundAwayFromZero(ScorePointsPerComponent × sqrt(abs(netProfitPln) / ScoreProfitReferencePln))
+careerScore    = max(0, audiencePoints + profitPoints)
+```
+
+At the first two reference values, each component contributes 500 points and the result is 1,000. Points can exceed 1,000; there is no score cap that would make later gains worthless. Square roots preserve a positive marginal value for viewers and PLN before integer rounding while reducing the effect of very large outliers. Compute the rounded components once in `Domain` and add those same integers in the recap; do not separately round a displayed total. `finalViewers` is the current channel audience when the run ends, either after its configured final week or at bankruptcy, not its peak or average. Apply the same formula to a defeat recap without a time bonus; its score does not turn defeat into a win. A zero-profit run receives zero profit points; a loss receives negative profit points, and the displayed total cannot drop below zero.
+
+| Final viewers | Net profit | Audience points | Profit points | Career score |
+| ---: | ---: | ---: | ---: | ---: |
+| 20 | 0 PLN | 71 | 0 | 71 |
+| 250 | 1,250 PLN | 250 | 250 | 500 |
+| 1,000 | 5,000 PLN | 500 | 500 | 1,000 |
+| 250 | -1,250 PLN | 250 | -250 | 0 |
+
+The score is a comparison and replay incentive, not a required win threshold. Review its two reference values after balance sweeps: if typical completed careers gain far more points from one component, adjust the references together and version the change. Do not add drama, peak audience, number of events, or a hidden moral bonus to the score.
+
+## Weekly balance to decide in the first slice
+
+The prior draft used formula-based follower growth, viewer estimates, energy and reputation. Those formulas are retired. Each week the player selects **one action** with an explicit outcome table affecting only money, viewers, and drama. Candidate first-prototype actions are an ordinary stream, a provocative stunt, a commercial/promotion attempt, and a quiet week; their final names, odds, costs, and effects remain open. Once authored, the action definitions and weighted outcomes live in the same published SQL Server catalogue as events and numeric parameters. Do not implement the old quality/income formulas by renaming their outputs.
+
+For early simulations, track at least:
+
+- Distribution of viewers and money at weeks 1, 13, 26, and 52 for the first configuration; use equivalent checkpoints if run length changes.
+- Distribution of final audience points, profit points, and career scores; check whether the two components have comparable influence in typical completed runs.
+- Fraction of turns and runs spent in each drama band; paths must be able to move between bands.
+- Expected value and worst ordinary loss for each choice; no option should dominate all three statistics.
+- Frequency of eligible, encountered, and repeated events by drama band.
+- Percentage of runs reaching week 52 versus bankrupting, plus the week and expense source of each defeat. Check whether unavoidable encounter costs create unfair losses.
+
+Tune exact odds and deltas against these results and human playtests. Keep the same seeded scenarios when comparing revisions.

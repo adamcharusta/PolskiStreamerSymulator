@@ -35,10 +35,16 @@ spec:
             - name: ASPNETCORE_HTTP_PORTS
               value: '8080'
             - name: ConnectionStrings__EventCatalog
-              value: Data Source=/data/events.db
+              valueFrom:
+                secretKeyRef:
+                  name: pss-db-app
+                  key: catalogConnectionString
+            - name: ConnectionStrings__Analytics
+              valueFrom:
+                secretKeyRef:
+                  name: pss-db-app
+                  key: analyticsConnectionString
           volumeMounts:
-            - name: catalogue
-              mountPath: /data
             - name: tmp
               mountPath: /tmp
           resources:
@@ -73,8 +79,5 @@ spec:
               drop:
                 - ALL
       volumes:
-        - name: catalogue
-          persistentVolumeClaim:
-            claimName: event-catalogue
         - name: tmp
           emptyDir: {}
