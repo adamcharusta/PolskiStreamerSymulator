@@ -1,0 +1,286 @@
+---
+- name: Bootstrap the single production VPS
+  hosts: pss-vps
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Validate target and required values
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == 'Ubuntu'
+          - ansible_distribution_version == '24.04'
+          - ansible_facts['architecture'] == 'x86_64'
+          - game_domain == 'polskistreamersymulator.pl'
+          - acme_email is match('^[^@ ]+@[^@ ]+\\.[^@ ]+$')
+          - admin_public_key is match('^ssh-ed25519 [A-Za-z0-9+/=]+( .*)?$')
+          - deploy_public_key is match('^ssh-ed25519 [A-Za-z0-9+/=]+( .*)?$')
+          - image_repository == 'ghcr.io/adamcharusta/polskistreamersymulator'
+          - k3s_version is match('^v1\\.36\\.[0-9]+\\+k3s[0-9]+$')
+          - cert_manager_version is match('^v[0-9]+\\.[0-9]+\\.[0-9]+$')
+        fail_msg: Fill the inventory with verified Ubuntu 24.04 host details and keys first.
+
+    - name: Install security and host packages
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - fail2ban
+          - sqlite3
+          - ufw
+          - unattended-upgrades
+        state: present
+        update_cache: true
+        upgrade: safe
+
+    - name: Enable unattended security updates
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Check whether package updates require a reboot
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot after package updates before installing k3s
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+      when: reboot_required.stat.exists
+
+    - name: Create administrator account
+      ansible.builtin.user:
+        name: pss-admin
+        groups: sudo
+        append: true
+        shell: /bin/bash
+        create_home: true
+        password_lock: true
+
+    - name: Install administrator key
+      ansible.posix.authorized_key:
+        user: pss-admin
+        key: "{{ admin_public_key }}"
+        exclusive: true
+        state: present
+
+    - name: Permit the key-only administrator to use sudo
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/pss-admin
+        content: "pss-admin ALL=(ALL) NOPASSWD: ALL\n"
+        owner: root
+        group: root
+        mode: '0440'
+        validate: /usr/sbin/visudo -cf %s
+
+    - name: Create restricted deployment account
+      ansible.builtin.user:
+        name: pss-deploy
+        shell: /bin/bash
+        create_home: true
+        password_lock: true
+
+    - name: Create deployment configuration directory
+      ansible.builtin.file:
+        path: /etc/pss
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Install deployment scripts
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "/usr/local/sbin/{{ item }}"
+        owner: root
+        group: root
+        mode: '0755'
+      loop:
+        - pss-deploy
+        - pss-deploy-ssh
+
+    - name: Install image-templated Deployment
+      ansible.builtin.copy:
+        src: ../k8s/deployment.yaml
+        dest: /etc/pss/deployment.yaml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Allow only the root-owned deployment command through sudo
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/pss-deploy
+        content: "pss-deploy ALL=(root) NOPASSWD: /usr/local/sbin/pss-deploy *\n"
+        owner: root
+        group: root
+        mode: '0440'
+        validate: /usr/sbin/visudo -cf %s
+
+    - name: Install restricted GitHub Actions key
+      ansible.posix.authorized_key:
+        user: pss-deploy
+        key: "{{ deploy_public_key }}"
+        key_options: 'command="/usr/local/sbin/pss-deploy-ssh",no-agent-forwarding,no-port-forwarding,no-pty,no-X11-forwarding'
+        exclusive: true
+        state: present
+
+    - name: Set default incoming firewall policy
+      community.general.ufw:
+        direction: incoming
+        policy: deny
+
+    - name: Allow SSH before enabling firewall
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Allow HTTP and HTTPS
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: ['80', '443']
+
+    # K3s documents these rules when UFW remains enabled. Do not expose 6443 publicly.
+    - name: Allow local k3s pod and service CIDRs
+      community.general.ufw:
+        rule: allow
+        from_ip: "{{ item }}"
+      loop:
+        - 10.42.0.0/16
+        - 10.43.0.0/16
+
+    - name: Enable firewall
+      community.general.ufw:
+        state: enabled
+
+    - name: Configure SSH login bans
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.d/pss-sshd.conf
+        content: |
+          [sshd]
+          enabled = true
+          port = ssh
+          maxretry = 5
+          findtime = 10m
+          bantime = 1h
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Fail2ban
+
+    - name: Enable Fail2ban
+      ansible.builtin.service:
+        name: fail2ban
+        state: started
+        enabled: true
+
+    - name: Apply SSH ban configuration before continuing
+      ansible.builtin.meta: flush_handlers
+
+    - name: Download official k3s installer
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /root/install-k3s.sh
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Install pinned k3s server
+      ansible.builtin.command: /root/install-k3s.sh
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+        INSTALL_K3S_EXEC: 'server --write-kubeconfig-mode=600'
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for k3s API
+      ansible.builtin.command: k3s kubectl get nodes
+      register: k3s_nodes
+      retries: 20
+      delay: 6
+      until: k3s_nodes.rc == 0
+      changed_when: false
+
+    - name: Wait for bundled Traefik middleware CRD
+      ansible.builtin.command: k3s kubectl wait --for=condition=Established crd/middlewares.traefik.io --timeout=30s
+      register: traefik_middleware_crd
+      retries: 10
+      delay: 6
+      until: traefik_middleware_crd.rc == 0
+      changed_when: false
+
+    - name: Wait for bundled Traefik ingress class
+      ansible.builtin.command: k3s kubectl get ingressclass traefik
+      register: traefik_ingress_class
+      retries: 20
+      delay: 6
+      until: traefik_ingress_class.rc == 0
+      changed_when: false
+
+    - name: Install pinned cert-manager release
+      ansible.builtin.command:
+        argv:
+          - k3s
+          - kubectl
+          - apply
+          - -f
+          - "https://github.com/cert-manager/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.yaml"
+      changed_when: false
+
+    - name: Wait for cert-manager components
+      ansible.builtin.command: >-
+        k3s kubectl -n cert-manager rollout status deployment/{{ item }} --timeout=180s
+      loop:
+        - cert-manager
+        - cert-manager-cainjector
+        - cert-manager-webhook
+      changed_when: false
+
+    - name: Copy static base manifests
+      ansible.builtin.copy:
+        src: "../k8s/{{ item }}"
+        dest: "/etc/pss/{{ item }}"
+        owner: root
+        group: root
+        mode: '0644'
+      loop:
+        - storageclass.yaml
+        - namespace.yaml
+        - pvc.yaml
+        - service.yaml
+        - redirect-https.yaml
+
+    - name: Render domain-specific manifests
+      ansible.builtin.template:
+        src: "../k8s/{{ item }}.j2"
+        dest: "/etc/pss/{{ item }}"
+        owner: root
+        group: root
+        mode: '0644'
+      loop:
+        - issuer.yaml
+        - ingress.yaml
+
+    - name: Apply base manifests in dependency order
+      ansible.builtin.command: "k3s kubectl apply -f /etc/pss/{{ item }}"
+      loop:
+        - storageclass.yaml
+        - namespace.yaml
+        - pvc.yaml
+        - service.yaml
+        - redirect-https.yaml
+        - issuer.yaml
+        - ingress.yaml
+      changed_when: false
+
+  handlers:
+    - name: Restart Fail2ban
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted

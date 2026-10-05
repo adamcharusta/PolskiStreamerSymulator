@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pss-server
+  namespace: pss
+spec:
+  type: ClusterIP
+  selector:
+    app: pss-server
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

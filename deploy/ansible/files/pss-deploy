@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+image=${1:-}
+case "$image" in
+  ghcr.io/adamcharusta/polskistreamersymulator@sha256:*) ;;
+  *) echo 'Unexpected image repository.' >&2; exit 2 ;;
+esac
+digest=${image##*@sha256:}
+if ! printf '%s' "$digest" | grep -Eq '^[a-f0-9]{64}$'; then
+  echo 'Expected a full SHA-256 image digest.' >&2
+  exit 2
+fi
+if [ "$#" -ne 1 ]; then
+  echo 'Expected one image argument.' >&2
+  exit 2
+fi
+
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+previous=$(k3s kubectl -n pss get deployment pss-server -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
+
+sed "s|__IMAGE__|$image|g" /etc/pss/deployment.yaml | k3s kubectl apply -f -
+if k3s kubectl -n pss rollout status deployment/pss-server --timeout=300s; then
+  echo "Deployed $image"
+  exit 0
+fi
+
+echo 'Rollout failed.' >&2
+if [ -n "$previous" ] && [ "$previous" != "$image" ]; then
+  echo "Restoring $previous" >&2
+  k3s kubectl -n pss set image deployment/pss-server "server=$previous"
+  k3s kubectl -n pss rollout status deployment/pss-server --timeout=300s
+fi
+exit 1

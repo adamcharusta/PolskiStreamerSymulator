@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PolskiStreamerSymulatorApp.Domain</RootNamespace>
+    <AssemblyName>PolskiStreamerSymulatorApp.Domain</AssemblyName>
+  </PropertyGroup>
+</Project>

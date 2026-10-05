@@ -1,0 +1,46 @@
+---
+# Run only after verifying a fresh pss-admin key login from another terminal.
+- name: Disable password and root SSH login after operator verification
+  hosts: pss-vps
+  become: true
+  tasks:
+    - name: Require explicit verification flag
+      ansible.builtin.assert:
+        that:
+          - admin_login_verified | default(false) | bool
+          - ansible_user == 'pss-admin'
+        fail_msg: Verify pss-admin SSH login, change inventory ansible_user, then pass -e admin_login_verified=true.
+
+    - name: Apply SSH hardening drop-in
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/00-pss-hardening.conf
+        content: |
+          PermitRootLogin no
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+          PubkeyAuthentication yes
+          AllowUsers pss-admin pss-deploy
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Validate complete SSH configuration before reload
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+
+    - name: Inspect effective SSH settings before reload
+      ansible.builtin.command: /usr/sbin/sshd -T
+      register: sshd_effective
+      changed_when: false
+
+    - name: Ensure key-only SSH settings take effect
+      ansible.builtin.assert:
+        that:
+          - "'permitrootlogin no' in sshd_effective.stdout"
+          - "'passwordauthentication no' in sshd_effective.stdout"
+          - "'kbdinteractiveauthentication no' in sshd_effective.stdout"
+
+    - name: Reload verified SSH configuration
+      ansible.builtin.service:
+        name: ssh
+        state: reloaded

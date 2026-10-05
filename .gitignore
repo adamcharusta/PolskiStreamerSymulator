@@ -1,0 +1,119 @@
+# .NET build output and local NuGet artifacts
+[Bb]in/
+[Oo]bj/
+[Aa]rtifacts/
+[Dd]ebug/
+[Rr]elease/
+publish/
+packages/
+*.nupkg
+*.snupkg
+
+# Visual Studio local state (keep .sln, .csproj, and .editorconfig tracked)
+.vs/
+*.suo
+*.rsuser
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+*.sdf
+*.opensdf
+*.dbmdl
+*.jfm
+ipch/
+*.vspscc
+*.vssscc
+.vsconfig
+
+# Visual Studio Code local state
+.vscode/
+.vscode-test/
+.history/
+*.code-workspace
+
+# JetBrains Rider / IntelliJ local state
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws
+*.DotSettings
+*.DotSettings.user
+
+# Test and coverage output
+[Tt]est[Rr]esults/
+test-results/
+playwright-report/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+*.trx
+*.trace.zip
+
+# Local SQLite event catalogues and runtime files.
+# Keep source-controlled event imports (for example JSON) outside these patterns.
+*.db
+*.db-*
+*.db.bak
+*.db3
+*.db3-*
+*.db3.bak
+*.sqlite
+*.sqlite-*
+*.sqlite.bak
+*.sqlite3
+*.sqlite3-*
+*.sqlite3.bak
+
+# Local configuration
+.env
+.env.*
+!.env.example
+!.env.sample
+appsettings.Local.json
+appsettings.*.Local.json
+*.log
+
+# Private deployment inventory and local image metadata
+deploy/ansible/inventory.yml
+deploy/ansible/inventory.*.yml
+!deploy/ansible/inventory.example.yml
+*.retry
+image-metadata.json
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+*.lnk
+
+# Linux and common editor backup files
+.directory
+.Trash-*/
+.nfs*
+.fuse_hidden*
+core.[0-9]*
+*~
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100/
+.Trashes/
+.fseventsd/
+.TemporaryItems/
+.DocumentRevisions-V100/
+.apdisk
+*.icloud
+__MACOSX/

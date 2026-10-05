@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+set -f
+
+# The key's authorized_keys entry forces this script for every SSH request.
+set -- ${SSH_ORIGINAL_COMMAND:-}
+if [ "$#" -ne 2 ] || [ "$1" != deploy ]; then
+  echo 'Only deploy <image digest> is permitted.' >&2
+  exit 2
+fi
+
+exec sudo -n /usr/local/sbin/pss-deploy "$2"

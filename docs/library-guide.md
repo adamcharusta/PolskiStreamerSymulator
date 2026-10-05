@@ -1,0 +1,26 @@
+# Library choices for the .NET solution
+
+This is a selection guide, not a dependency-install checklist. The solution currently includes only the packages listed in `Directory.Packages.props` and has no game behavior yet. Add a library when a feature needs it, pin its version centrally, build, and record any architectural effect.
+
+| Library | Recommendation | Scope and reason |
+| --- | --- | --- |
+| [WolverineFX](https://wolverinefx.net/tutorials/mediator.html) | Adopt on the server with the first command handler | CQRS dispatch and handler conventions; mediator-only mode for the MVP |
+| [Mapster](https://github.com/MapsterMapper/Mapster) | Add when API DTO mappings become nontrivial | Boundary mapping in `Server`; do not replace domain methods with mappings |
+| [FluentValidation](https://docs.fluentvalidation.net/en/latest/aspnet.html) plus [Wolverine integration](https://wolverinefx.net/guide/handlers/fluent-validation) | Add with the first command validator | Input rules in `Application`, called from the Wolverine pipeline or explicitly; domain invariants still mandatory |
+| [EF Core](https://learn.microsoft.com/en-us/ef/core/) and SQLite provider | Add with the first event catalogue repository | Store and query shared event definitions in `Infrastructure`; no player records |
+| [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview) | Use built-in | API and versioned save serialization; avoid another JSON package without a concrete gap |
+| `ILogger<T>`, health checks, Problem Details; `Microsoft.AspNetCore.OpenApi` when an OpenAPI document is needed | Prefer Microsoft ASP.NET Core facilities | Diagnostics and HTTP contracts before adding third-party logging or API packages |
+| [bUnit](https://bunit.dev/docs/getting-started/) and [Playwright](https://playwright.dev/dotnet/docs/intro) | Add with UI tests | Component-level and browser-level confidence |
+
+## Packages to defer
+
+- `WolverineFx.EntityFrameworkCore`, durable transports, outbox, and queues: useful when a real asynchronous workflow or transactional message publication appears; ordinary synchronous commands do not justify them.
+- Serilog or another logging provider: built-in structured logging is enough until deployment needs a specific sink.
+- Redis/cache packages: a single-player MVP has no demonstrated cache bottleneck.
+- Authentication/identity packages: no player accounts are needed for browser-local saves. Add authentication only if an event-authoring admin UI is introduced.
+- `FluentValidation.AspNetCore`: its automatic MVC validation is not a fit for a Blazor/Minimal API flow and is not recommended for new projects by its maintainers.
+- Another mediator library: Wolverine already fills that role once selected.
+
+## Existing package cleanup
+
+`Application` and `Infrastructure` currently reference `Microsoft.AspNetCore.Components.WebAssembly` only to type their empty DI extension methods. Move registration to `IServiceCollection`, then remove those references. `Ardalis.GuardClauses` is already present in both projects; retain it only where it improves boundary checks, and keep domain invariants explicit in domain types. The WebAssembly client should stop referencing `Infrastructure` when `Server` and `Contracts` are introduced.

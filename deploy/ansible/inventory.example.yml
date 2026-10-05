@@ -1,0 +1,15 @@
+# Copy outside the repository (or encrypt with Ansible Vault) and fill every placeholder.
+all:
+  hosts:
+    pss-vps:
+      ansible_host: REPLACE_WITH_VPS_IP
+      ansible_user: REPLACE_WITH_EXISTING_SUDO_USER
+      ansible_become: true
+  vars:
+    game_domain: polskistreamersymulator.pl
+    acme_email: REPLACE_WITH_ACME_EMAIL
+    admin_public_key: REPLACE_WITH_ADMIN_SSH_PUBLIC_KEY
+    deploy_public_key: REPLACE_WITH_GITHUB_ACTIONS_SSH_PUBLIC_KEY
+    image_repository: ghcr.io/adamcharusta/polskistreamersymulator
+    k3s_version: v1.36.5+k3s1
+    cert_manager_version: v1.21.2

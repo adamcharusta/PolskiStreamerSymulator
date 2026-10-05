@@ -1,0 +1,33 @@
+# Normalize text in Git and check it out with LF on every platform.
+* text=auto eol=lf
+
+# Windows command scripts require CRLF when they are added later.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets and generated databases must not be line-ending normalized.
+*.png binary -eol
+*.jpg binary -eol
+*.jpeg binary -eol
+*.gif binary -eol
+*.webp binary -eol
+*.avif binary -eol
+*.ico binary -eol
+*.woff binary -eol
+*.woff2 binary -eol
+*.ttf binary -eol
+*.otf binary -eol
+*.mp3 binary -eol
+*.ogg binary -eol
+*.wav binary -eol
+*.mp4 binary -eol
+*.webm binary -eol
+*.wasm binary -eol
+*.pdf binary -eol
+*.zip binary -eol
+*.dll binary -eol
+*.exe binary -eol
+*.db binary -eol
+*.db3 binary -eol
+*.sqlite binary -eol
+*.sqlite3 binary -eol
