@@ -172,7 +172,7 @@ Test platform choice, delegated by the creator during review:
 1. A solution build succeeds with zero warnings.
 2. `dotnet test --solution PolskiStreamerSymulatorApp.sln -c Release` passes from `PolskiStreamerSymulatorApp`, the way the deploy workflow calls it.
 3. `dotnet list src/BlazorApp/BlazorApp.csproj reference` shows only Contracts, and Application and Infrastructure no longer list the WebAssembly package.
-4. `dotnet publish` of the Server in Release, then the published `PolskiStreamerSymulatorApp.Server.dll` run with `ASPNETCORE_ENVIRONMENT=Production` and `ASPNETCORE_HTTP_PORTS=8080`: the host page, its assets, and both health paths respond as the tests expect, and headless Chrome renders the Home page with no failed requests.
+4. `dotnet publish` of the Server in Release, then the published `PolskiStreamerSymulatorApp.Server.dll` run with `ASPNETCORE_ENVIRONMENT=Production` and `ASPNETCORE_HTTP_PORTS` set to a free local port: the host page, its assets, and both health paths respond as the tests expect, and headless Chrome renders the Home page with no failed requests.
 5. If the local Docker daemon is running, `deploy/Dockerfile` builds and the container answers the same requests. The Docker build context excludes the local `artifacts` build folder.
 
 ## Documentation updates
