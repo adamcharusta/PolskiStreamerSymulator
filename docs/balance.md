@@ -91,9 +91,29 @@ At the first two reference values, each component contributes 500 points and the
 
 The score is a comparison and replay incentive, not a required win threshold. Review its two reference values after balance sweeps: if typical completed careers gain far more points from one component, adjust the references together and version the change. Do not add drama, peak audience, number of events, or a hidden moral bonus to the score.
 
-## Weekly balance to decide in the first slice
+## Provisional weekly actions for the first slice
 
-The prior draft used formula-based follower growth, viewer estimates, energy and reputation. Those formulas are retired. Each week the player selects **one action** with an explicit outcome table affecting only money, viewers, and drama. Candidate first-prototype actions are an ordinary stream, a provocative stunt, a commercial/promotion attempt, and a quiet week; their final names, odds, costs, and effects remain open. Once authored, the action definitions and weighted outcomes live in the same published SQL Server catalogue as events and numeric parameters. Do not implement the old quality/income formulas by renaming their outputs.
+The proposed first playable fixture has four actions. These numbers are **draft content**, not confirmed final balance or implemented game data. Costs are guaranteed expenses paid before the roll; outcome money is recorded by category. Each row's probabilities for one action sum to 100%.
+
+| Action ID / Polish label | Guaranteed cost | Outcome ID | Chance | Viewers | Drama | Other cash flow |
+| --- | ---: | --- | ---: | ---: | ---: | --- |
+| `regular_stream` / Zwykły stream | 0 PLN | `steady` | 60% | +8 | 0 | None |
+| | | `good_chat` | 30% | +15 | +1 | +20 PLN donations |
+| | | `slow_evening` | 10% | 0 | -1 | None |
+| `provocative_stunt` / Prowokacyjny materiał | 100 PLN | `viral` | 45% | +45 | +12 | +80 PLN donations |
+| | | `mixed_reaction` | 35% | +15 | +8 | +20 PLN donations |
+| | | `backlash` | 20% | -10 | +20 | 150 PLN expense |
+| `sponsor_pitch` / Oferta dla sponsora | 50 PLN | `deal` | 50% | +5 | 0 | +250 PLN sponsors |
+| | | `small_deal` | 30% | 0 | +1 | +100 PLN sponsors |
+| | | `rejected` | 20% | -3 | +2 | 20 PLN expense |
+| `quiet_week` / Spokojny tydzień | 0 PLN | `rest` | 70% | -1 | -5 | None |
+| | | `loyal_audience` | 30% | +2 | -3 | +10 PLN donations |
+
+The proposed first demo event is a late internet bill. Its encounter would cost 20 PLN, followed by either a paid quiet resolution or a free public complaint; both responses would have percentage-based outcomes. This would exercise both event cost types and pending-event saves. Its final copy and odds remain subject to the content review in [event catalogue](event-catalogue.md).
+
+## Weekly balance to decide after the first slice
+
+The prior draft used formula-based follower growth, viewer estimates, energy and reputation. Those formulas are retired. Each week the player selects **one action** with an explicit outcome table affecting only money, viewers, and drama. The proposed fixture above makes the first menu concrete; tune names, odds, costs, and effects through playtests. The production action definitions and weighted outcomes belong in the same published SQL Server catalogue as events and numeric parameters. Do not implement the old quality/income formulas by renaming their outputs.
 
 For early simulations, track at least:
 

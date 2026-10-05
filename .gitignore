@@ -5,6 +5,7 @@
 [Dd]ebug/
 [Rr]elease/
 publish/
+.publish-check/
 packages/
 *.nupkg
 *.snupkg
