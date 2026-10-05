@@ -17,7 +17,7 @@ Server ---------------> Application, Infrastructure, Contracts, BlazorApp
 BlazorApp ------------> Contracts
 ```
 
-`Contracts` and `Server` are proposed new projects. `Server` is the ASP.NET Core composition root and API host; `BlazorApp` remains a WebAssembly view. The public game and its API share `polskistreamersymulator.pl`; the owner-only admin UI and admin APIs use `admin.polskistreamersymulator.pl`. Both hostnames may route to the same server pod, with host-based endpoint separation and server-side authorization for every admin operation. The current client-to-Infrastructure project reference must be removed when this graph is implemented. [Microsoft documents](https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly/?view=aspnetcore-10.0) hosted WebAssembly.
+`Contracts` and `Server` are proposed new projects. `Server` is the ASP.NET Core composition root and API host; `BlazorApp` remains a WebAssembly view. The public game and its API share `polskistreamersymulator.pl`; the owner-only admin UI and admin APIs use `admin.polskistreamersymulator.pl`. Both hostnames may route to the same server pod, with host-based endpoint separation and server-side authorization for every admin operation. [Microsoft documents](https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly/?view=aspnetcore-10.0) hosted WebAssembly.
 
 | Project | Owns | Does not own |
 | --- | --- | --- |
@@ -28,7 +28,7 @@ BlazorApp ------------> Contracts
 | `Server` | Host and DI composition, Wolverine configuration, player and authenticated admin endpoints, authorization, structured logging, operational metrics, size limits, transport error mapping, static client hosting | Gameplay formulas or player persistence |
 | `BlazorApp` | Polish/English player components, admin editing views, screen state, API client, browser save adapter, app-open/client-error reporting, accessibility | SQLite access or trusted gameplay rules |
 
-`Infrastructure` registers its adapters; `Server` composes the full application. Refactor the current empty registration extensions in `Application` and `Infrastructure` to extend `IServiceCollection` rather than `WebAssemblyHostBuilder`, then remove their `Microsoft.AspNetCore.Components.WebAssembly` references. `BlazorApp` should reference only `Contracts` among the project libraries.
+`Application` and `Infrastructure` expose `IServiceCollection` registration extensions, `AddApplicationServices` and `AddInfrastructureServices`, and reference no Blazor packages. `Infrastructure` registers its adapters there, and the composition root calls both. `BlazorApp` references only `Contracts` among the project libraries.
 
 ## CQRS flow and local career state
 

@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PolskiStreamerSymulatorApp.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static void AddInfrastructureServices(this WebAssemblyHostBuilder builder)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        ArgumentNullException.ThrowIfNull(services);
+
+        return services;
     }
 }

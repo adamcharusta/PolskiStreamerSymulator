@@ -23,4 +23,4 @@ This is a selection guide, not a dependency-install checklist. The solution curr
 
 ## Existing package cleanup
 
-`Application` and `Infrastructure` currently reference `Microsoft.AspNetCore.Components.WebAssembly` only to type their empty DI extension methods. Move registration to `IServiceCollection`, then remove those references. `Ardalis.GuardClauses` is already present in both projects; retain it only where it improves boundary checks, and keep domain invariants explicit in domain types. The WebAssembly client should stop referencing `Infrastructure` when `Server` and `Contracts` are introduced.
+`Application` and `Infrastructure` reference `Microsoft.Extensions.DependencyInjection.Abstractions` for their registration extensions instead of the WebAssembly package, and the WebAssembly client references only `Contracts`. `Ardalis.GuardClauses` is still present in both projects; retain it only where it improves boundary checks, and keep domain invariants explicit in domain types.

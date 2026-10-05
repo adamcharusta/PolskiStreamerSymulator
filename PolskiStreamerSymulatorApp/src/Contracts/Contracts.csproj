@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PolskiStreamerSymulatorApp.Contracts</RootNamespace>
+    <AssemblyName>PolskiStreamerSymulatorApp.Contracts</AssemblyName>
+  </PropertyGroup>
+
+</Project>
