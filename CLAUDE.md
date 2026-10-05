@@ -9,8 +9,8 @@ The key specifications are:
 - `docs/balance.md` — provisional numeric model and balancing method.
 - `docs/event-catalogue.md` — event conditions, choices, and effects.
 - `docs/sample-events.md` — twenty draft event examples and provisional outcomes.
-- `docs/streamer-name-generation.md` — SQL Server name vocabulary, suggestions, and custom entry.
-- `docs/event-system.md` — SQL Server weekly actions, events, typed game parameters, name-part schema, probabilities, and publishing rules.
+- `docs/streamer-name-generation.md` — SQLite name vocabulary, suggestions, and custom entry.
+- `docs/event-system.md` — SQLite weekly actions, events, story flags, repeat policies, typed game parameters, name parts, probabilities, and publishing rules.
 - `docs/experience-and-content.md` — screens, tone, accessibility, and content rules.
 - `docs/technical-design.md` — .NET 10, CQRS project graph, server design, and persistence boundary.
 - `docs/observability-and-analytics.md` — logging, operational metrics, aggregate gameplay counters, and privacy safeguards.
@@ -22,4 +22,4 @@ The key specifications are:
 
 Deployment guidance is in `docs/deployment.md` (VPS, k3s, Ansible, GitHub Actions, HTTPS, and backups).
 
-For a new task, consult `docs/README.md` to identify the authoritative document, then update that document alongside any eventual code change. Documentation is in English; player-facing game text is planned in Polish.
+For a new task, consult `docs/README.md` to identify the authoritative document, then update that document alongside any eventual code change. Documentation is in English; player-facing game text is planned in Polish and English.

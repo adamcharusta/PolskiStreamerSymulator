@@ -1,8 +1,8 @@
 # Twenty sample events for the first content pass
 
-These **20 draft examples** make the event format concrete. They are not a published SQL Server catalogue or approved final balance. The creator's longer-term target remains at least 200 original events. Import them only after Polish copy review, balance simulations, and conversion to the validated source format in [event system](event-system.md).
+These **20 draft examples** make the event format concrete. They are not a published SQLite catalogue or approved final balance. The creator is considering roughly 200–400 original events for the first public release; the exact count remains open. Enter and publish these examples through the authenticated admin workflow only after Polish copy review, English adaptation, balance simulations, and catalogue validation in [event system](event-system.md).
 
-The headings, conditions, and notes are documentation in English; quoted prompts, response labels, and results are prospective **Polish player-facing copy**. All chances are percentages of an eligible week for an encounter and percentages of the chosen response for a result. A response's percentages total 100%. `Cost` is a guaranteed response expense paid before its outcome roll; `encounter cost` is a separate expense paid when the event is selected. `+PLN sponsor` and `+PLN donation` are income entries in those ledger categories; `-PLN expense` is an expense entry. The ordinary weekly subscription payment never appears in an event result. All viewer and drama changes are applied with the bounds in [balance](balance.md). A cooldown counts completed weeks since this event last appeared. The proposed calm/middle/high bands are 0–33 / 34–66 / 67–100.
+The headings, conditions, and notes are documentation in English; quoted prompts, response labels, and results are prospective **Polish player-facing copy**. These examples do not yet include the English player-facing version required for publication. All chances are percentages of an eligible week for an encounter and percentages of the chosen response for a result. A response's percentages total 100%. `Cost` is a guaranteed response expense paid before its outcome roll; `encounter cost` is a separate expense paid when the event is selected. `+PLN sponsor` and `+PLN donation` are income entries in those ledger categories; `-PLN expense` is an expense entry. The ordinary weekly subscription payment never appears in an event result. All viewer and drama changes are applied with the bounds in [balance](balance.md). Each draft says either `once per career` or a cooldown; a cooldown permits repetition after that many completed weeks since the last encounter. A flag-gated follow-up still has its own encounter chance and may never appear. The proposed calm/middle/high bands are 0–33 / 34–66 / 67–100.
 
 ## Calm-band events
 
@@ -38,7 +38,7 @@ The headings, conditions, and notes are documentation in English; quoted prompts
 
 ### 04. `volunteer_moderators` — Ochotnicy do moderacji
 
-- Eligibility: calm drama, at least 60 viewers. Encounter 8%; cooldown 7 weeks; encounter cost 0 PLN.
+- Eligibility: calm drama, at least 60 viewers. Encounter 8%; once per career; encounter cost 0 PLN.
 - Prompt: „Dwie osoby z czatu proponują pomoc w moderacji. Jedna ma już przygotowany regulamin dłuższy od opisu kanału.”
 
 | Response | Cost | Weighted results |
@@ -70,13 +70,15 @@ The headings, conditions, and notes are documentation in English; quoted prompts
 
 ### 07. `clipped_sentence` — Zdanie wycięte z kontekstu
 
-- Eligibility: middle drama, at least 20 viewers. Encounter 12%; cooldown 5 weeks; encounter cost 0 PLN.
+- Eligibility: middle drama, at least 20 viewers. Encounter 12%; once per career; encounter cost 0 PLN.
 - Prompt: „Krótki klip z twojej transmisji krąży bez poprzednich pięciu minut. W komentarzach każdy zna już całą historię.”
 
 | Response | Cost | Weighted results |
 | --- | ---: | --- |
 | „Pokaż pełny fragment” | 0 PLN | 70%: „Wyjaśnienie dociera do widzów” (`+6 viewers, -5 drama`); 30%: „Część osób ogląda tylko nagłówek” (`-5 viewers, +4 drama`). |
 | „Odpowiedz jednym żartem” | 0 PLN | 55%: „Żart rozładowuje atmosferę” (`+15 viewers, -1 drama`); 45%: „Powstaje drugi klip” (`+8 viewers, +8 drama`). |
+
+The 30% result where viewers see only the headline and the 45% result where a second clip appears set the draft narrative flag `clip_backlash` at this week. The other results do not set it. This creates a chance for event 18 in later weeks, without guaranteeing that event.
 
 ### 08. `sponsor_brief` — Brief z trzynastoma poprawkami
 
@@ -182,13 +184,15 @@ The headings, conditions, and notes are documentation in English; quoted prompts
 
 ### 18. `apology_stream` — Czy robić stream z wyjaśnieniem?
 
-- Eligibility: high drama, at least 60 viewers. Encounter 10%; cooldown 8 weeks; encounter cost 0 PLN.
+- Eligibility: high drama, at least 60 viewers, and `clip_backlash` set by event 07 one to eight weeks earlier. Encounter 10% on each eligible week; once per career; encounter cost 0 PLN.
 - Prompt: „Po serii nieporozumień widzowie pytają o wyjaśnienie. Ktoś już zrobił miniaturę z wielkim napisem «OŚWIADCZENIE».”
 
 | Response | Cost | Weighted results |
 | --- | ---: | --- |
 | „Wyjaśnij sprawę bez widowiska” | 0 PLN | 70%: „Szczera rozmowa obniża napięcie” (`+4 viewers, -10 drama`); 30%: „Część osób nie przyjmuje wyjaśnienia” (`-12 viewers, +3 drama`). |
 | „Zrób głośny stream o sprawie” | 0 PLN | 50%: „Transmisja zbiera dużą publiczność” (`+40 viewers, +5 drama, +30 PLN donation`); 50%: „Wypowiedź rozpala nową kłótnię” (`-20 viewers, +12 drama`). |
+
+Every event 18 outcome clears `clip_backlash`. If the follow-up never passes its own roll before the eight-week window closes, the flag expires without an apology event. These are draft chain rules, not approved final copy or balance.
 
 ## Events for every drama band
 
@@ -214,7 +218,7 @@ The headings, conditions, and notes are documentation in English; quoted prompts
 
 ## Review before publication
 
-- Verify the 20 unique IDs, Polish copy, eligibility, cooldowns, encounter chances, and each response's 100% total in the importer. These examples are deliberately varied, not statistically balanced.
+- Verify the 20 unique IDs, Polish copy, English adaptation, eligibility, per-event repeat policies and cooldowns, the `clip_backlash` follow-up window, encounter chances, and each response's 100% total in the admin publication check. Both locales must preserve the same visible risks and rewards. These examples are deliberately varied, not statistically balanced.
 - Check that early weeks have enough eligible events in the middle band and that calm/high-drama runs are not starved of encounters. The current 20 may still feel repetitive across 52 weeks.
-- Confirm that every paid response has a free fallback if the run remains active after the encounter cost. In particular, `rented_studio` can make its paid response unaffordable, which is intentional. If an encounter cost reaches the -1,000 PLN bankruptcy limit, show the defeat recap without offering a response.
+- Confirm that every paid response has a free fallback if the run remains active after the encounter cost. A paid `rented_studio` response remains selectable without cash on hand and even if its guaranteed cost temporarily crosses the bankruptcy limit; its rolled result may rescue the run before the response checkpoint. If an encounter cost reaches the -1,000 PLN bankruptcy limit, show the defeat recap without offering a response.
 - Simulate the interaction between event viewer changes, the proposed weekly subscription formula, and the final audience/profit score before freezing numbers.

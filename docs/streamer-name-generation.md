@@ -2,9 +2,9 @@
 
 ## Player experience
 
-The setup screen has one **streamer name** field. A published SQL Server catalogue supplies a suggested name made by concatenating two approved parts, for example `Random` + `Bruce` → `RandomBruce` or `Neon` + `Borsuk` → `NeonBorsuk`. The suggestion appears in the editable field. The player may accept it, request another suggestion, or replace it with a custom name. Regenerating never overwrites a name after the player has edited the field without an explicit click. Channel name remains a separate optional setup field if it is kept in the first UI.
+The setup screen has one **streamer name** field. A published SQLite catalogue supplies a suggested name made by concatenating two approved parts, for example `Random` + `Bruce` → `RandomBruce` or `Neon` + `Borsuk` → `NeonBorsuk`. The suggestion appears in the editable field. The player may accept it, request another suggestion, or replace it with a custom name. Regenerating never overwrites a name after the player has edited the field without an explicit click. The first version has no separate channel-name field.
 
-The name is identity text, not an archetype: it grants no starting bonus, eligibility modifier, or scoring effect. There is no uniqueness guarantee because the game has no accounts or global name registry. The accepted name is stored in the browser career save; SQL Server stores only the shared vocabulary. A custom name is never written back into the vocabulary.
+The name is identity text, not an archetype: it grants no starting bonus, eligibility modifier, or scoring effect. There is no uniqueness guarantee because the game has no accounts or global name registry. The accepted name is stored in the browser career save; SQLite stores only the shared vocabulary. A custom name is never written back into the vocabulary.
 
 ## Published vocabulary
 
@@ -15,7 +15,7 @@ The name is identity text, not an archetype: it grants no starting bonus, eligib
 | `Random`, `Neon`, `Cichy`, `Turbo`, `Pixel` | `Bruce`, `Borsuk`, `Kret`, `Router`, `Piksel` |
 | `Nocny`, `Mega`, `Kosmiczny`, `Dziki`, `Pogodny` | `Kabel`, `Kometa`, `Mikrofon`, `Pstryk`, `Ziemniak` |
 
-The importer requires at least two enabled parts of each kind; unique stable IDs; no duplicate normalized text within a kind; and each enabled part to be 2–16 letters or digits with the intended casing. Concatenation has no separator and must fit the 32-character streamer-name limit. Review seed words for unintended offensive combinations, real creator impersonation, and readable capitalization before publishing. Editing the vocabulary creates a new catalogue version; old saved names do not change.
+The admin publication check requires at least two enabled parts of each kind; unique stable IDs; no duplicate normalized text within a kind; and each enabled part to be 2–16 letters or digits with the intended casing. Concatenation has no separator and must fit the 32-character streamer-name limit. Review seed words for unintended offensive combinations, real creator impersonation, and readable capitalization before publishing. Suggestions may use the same vocabulary in Polish and English; the name itself is not translated when the player switches language. Editing the vocabulary creates a new catalogue version; old saved names do not change.
 
 ## Suggestion flow
 
@@ -29,7 +29,7 @@ The player can edit the field directly. Proposed validation for both suggested a
 ## Tests to add with the feature
 
 - An eligible published vocabulary produces a two-part suggestion with exact stored casing, a valid length, and no separator.
-- A missing or invalid part group prevents publication; duplicate text and IDs fail import.
-- A custom name overrides the suggestion and survives save/reload without entering SQL Server.
+- A missing or invalid part group prevents publication; duplicate text and IDs fail admin validation and any seed import.
+- A custom name overrides the suggestion and survives save/reload without entering SQLite.
 - Repeated suggestion requests do not advance the gameplay PRNG or alter the same-seed career outcomes.
 - A new catalogue version changes future suggestions but leaves an open setup screen and an existing run pinned to their selected version.

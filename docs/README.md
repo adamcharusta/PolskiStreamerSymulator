@@ -6,20 +6,20 @@ This is a **pre-production baseline** updated 2026-10-05. It specifies an implem
 
 | Document | Authoritative for | Status |
 | --- | --- | --- |
-| [Product brief](product-brief.md) | Product promise, audience, commercial stance, scope, success criteria | Proposed baseline |
-| [Game design](game-design.md) | Confirmed three-statistic, dice-driven core, configurable run length, bankruptcy ending, player name choice, and final-score inputs; proposed weekly menu | Confirmed core; weekly choices pending |
-| [Balance](balance.md) | First published numeric defaults, configurable bankruptcy and duration, final-score formula, provisional income, odds, and tuning method | Initial values confirmed; normalization and income proposed |
-| [Event catalogue](event-catalogue.md) | Authoring contract, design example, and staged target of at least 200 events | Content plan; final Polish copy and odds pending |
-| [Sample events](sample-events.md) | Twenty draft events with eligibility, costs, Polish choices, odds, and effects | Examples only; not published or balance-approved |
-| [Streamer name generation](streamer-name-generation.md) | Two-part SQL Server vocabulary, suggestion flow, custom entry, validation, and examples | Generator direction confirmed; seed words and input bounds proposed |
-| [Experience and content](experience-and-content.md) | Screens, feedback, writing, accessibility, content boundaries | Proposed baseline |
-| [Technical design](technical-design.md) | .NET stack, CQRS project graph, SQL Server proposal, server, browser saves | Architecture baseline; database switch proposed |
+| [Product brief](product-brief.md) | Product promise, audience, commercial stance, scope, success criteria | Free/ad-free and bilingual first release confirmed; remaining scope proposed |
+| [Game design](game-design.md) | Three-statistic dice-driven career, up to three events per week, debt-funded choices, story chains, endings, and weekly menu | Core rules and special ending classifications confirmed |
+| [Balance](balance.md) | First published numeric defaults, configurable bankruptcy and duration, final-score formula, provisional income, odds, and tuning method | Initial values and score formula confirmed; action odds and subscription income to test |
+| [Event catalogue](event-catalogue.md) | Bilingual authoring contract, design example, and proposed 200–400 event range for first release | Content plan; exact count, reviewed Polish/English copy, and final odds pending |
+| [Sample events](sample-events.md) | Twenty Polish draft events with eligibility, costs, choices, odds, effects, and an optional story chain | Examples only; English adaptation and balance review pending |
+| [Streamer name generation](streamer-name-generation.md) | Two-part SQLite vocabulary, suggestion flow, custom entry, validation, and examples | Generator direction confirmed; seed words and input bounds proposed |
+| [Experience and content](experience-and-content.md) | Screens, feedback, bilingual writing, accessibility, content boundaries | Language and setup scope confirmed; detailed presentation proposed |
+| [Technical design](technical-design.md) | .NET stack, CQRS project graph, SQLite with EF Core, server, browser saves and file export/import | Architecture baseline; SQLite choice confirmed, file layout proposed |
 | [Logging and analytics](observability-and-analytics.md) | Server and client errors, operational metrics, aggregate gameplay counters, data handling | Proposed design; not implemented |
 | [Deployment](deployment.md) | VPS, k3s, Ansible, HTTPS, GitHub Actions, operations and backups | Infrastructure scaffold; not deployed |
-| [Event system](event-system.md) | SQL Server game-catalogue schema for weekly actions, events, parameters, and name parts; chance rolls, publishing, version pinning | Proposed detailed design |
+| [Event system](event-system.md) | SQLite catalogue schema for actions, events, narrative flags, repeat policy, parameters, and names; rolls, publishing, version pinning | Proposed detailed design |
 | [Testing strategy](testing-strategy.md) | Proposed test projects, scenarios, tools, and gates | Proposed baseline |
-| [Library guide](library-guide.md) | Wolverine, Mapster, FluentValidation, persistence, and package timing | Proposed baseline |
-| [Delivery plan](delivery-plan.md) | Phases, dependencies, definition of done | Proposed baseline |
+| [Library guide](library-guide.md) | Confirmed Wolverine, Mapster, and FluentValidation; persistence and package timing | Stack decisions confirmed; package timing planned |
+| [Delivery plan](delivery-plan.md) | Phases, ordered work packages, dependencies, acceptance evidence, and release gates | Actionable plan; dates and estimates intentionally unset |
 | [Decisions](decisions.md) | Decision state and unresolved product questions | Living log |
 | [Reference analysis](reference-analysis.md) | Verified reference observations and design separation | Research note |
 

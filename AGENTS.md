@@ -11,8 +11,8 @@ This file is a navigation map for contributors and coding agents. The authoritat
 | Event eligibility, choices, and effects | `docs/event-catalogue.md` |
 | Twenty draft event examples and their provisional odds | `docs/sample-events.md` |
 | Streamer name suggestions, custom names, and vocabulary rules | `docs/streamer-name-generation.md` |
-| SQL Server weekly actions, events, typed game parameters, name-part schema, dice rolls, versioning, and authoring | `docs/event-system.md` |
-| Screens, Polish copy conventions, accessibility, and content boundaries | `docs/experience-and-content.md` |
+| SQLite weekly actions, events, story flags, repeat policies, typed game parameters, names, dice rolls, and publishing | `docs/event-system.md` |
+| Screens, Polish/English copy conventions, accessibility, and content boundaries | `docs/experience-and-content.md` |
 | Stack, architecture, state schema, saves, and quality gates | `docs/technical-design.md` |
 | Server and client logging, operational metrics, aggregate gameplay analytics, and data handling | `docs/observability-and-analytics.md` |
 | VPS, k3s, Ansible, GitHub Actions, TLS, backups, and rollout | `docs/deployment.md` |
@@ -27,6 +27,6 @@ This file is a navigation map for contributors and coding agents. The authoritat
 - Read `docs/decisions.md` before implementing a proposed choice. Ask for a decision when it blocks a meaningful product choice; otherwise implement the documented default and record the assumption.
 - Keep game mechanics in `docs/game-design.md`, numeric tuning in `docs/balance.md`, and implementation details in `docs/technical-design.md`.
 - Update the relevant document when changing behavior. Keep `CLAUDE.md` and this file as indexes.
-- Keep documentation and code comments in English. Write player-facing text in Polish and keep it outside simulation logic.
+- Keep documentation and code comments in English. Provide player-facing text in Polish and English, and keep it outside simulation logic.
 - Treat the linked football simulator as inspiration for the career loop only. Create original writing, visuals, event data, and code.
 - Do not claim a feature is implemented because it appears in the specification. `PolskiStreamerSymulatorApp/` currently contains only a .NET/Blazor skeleton.
