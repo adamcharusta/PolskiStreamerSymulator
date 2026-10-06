@@ -1,4 +1,4 @@
-# This build becomes usable when PolskiStreamerSymulatorApp/src/Server exists.
+# Multi-stage publish of the ASP.NET Core Server, which also serves the Blazor WebAssembly client.
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY . .
@@ -10,4 +10,4 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_HTTP_PORTS=8080
 USER 1654
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "Server.dll"]
+ENTRYPOINT ["dotnet", "PolskiStreamerSymulatorApp.Server.dll"]

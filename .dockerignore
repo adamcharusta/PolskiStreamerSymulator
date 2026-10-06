@@ -5,6 +5,8 @@
 .vscode
 **/bin
 **/obj
+**/artifacts
+.publish-check
 **/TestResults
 **/*.db
 **/*.db-*

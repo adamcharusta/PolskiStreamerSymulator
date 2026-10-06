@@ -17,7 +17,7 @@ This is the canonical record of choices that affect scope or implementation. **C
 | D-11 | Real-world references | Confirmed | Use fictional names, brands, and platforms while writing situations that clearly evoke specific real internet stories involving public creators only. Do not make a private person the recognizable subject of an allusion. No additional blanket topic exclusions are planned; review sensitive allusions case by case. |
 | D-12 | Online services | Proposed | An ASP.NET Core server is confirmed; no real platform APIs or third-party browser trackers are proposed. First-party aggregate analytics are now requested and designed in `observability-and-analytics.md`. |
 | D-13 | Architecture | Confirmed | CQRS with Domain for game domains, Application for use cases, Infrastructure for adapters, and BlazorApp for views. |
-| D-14 | Server | Confirmed | Add an ASP.NET Core server. The proposed graph also adds a small shared `Contracts` project. |
+| D-14 | Server | Confirmed | Add an ASP.NET Core server and a small shared `Contracts` project for HTTP DTOs. Both exist since work package F1. |
 | D-15 | Mediator | Confirmed | Use WolverineFX on the server for CQRS dispatch. Start with mediator-only mode; add durable messaging only for a demonstrated need. |
 | D-16 | Mapping | Confirmed | Use Mapster at the API boundary for DTO mappings. Do not bypass Domain validation. |
 | D-17 | Validation | Confirmed | Use FluentValidation for Application commands; built-in Blazor form feedback and Domain invariants remain. |

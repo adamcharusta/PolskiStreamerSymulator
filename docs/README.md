@@ -17,7 +17,7 @@ This is a **pre-production baseline** updated 2026-10-06. It specifies an implem
 | [Logging and analytics](observability-and-analytics.md) | Server and client errors, operational metrics, aggregate gameplay counters, data handling | Proposed design; not implemented |
 | [Deployment](deployment.md) | VPS, k3s, Ansible, HTTPS, GitHub Actions, operations and backups | Infrastructure scaffold; not deployed |
 | [Event system](event-system.md) | SQLite catalogue schema for actions, events, narrative flags, repeat policy, parameters, and names; rolls, publishing, version pinning | Proposed detailed design |
-| [Testing strategy](testing-strategy.md) | Proposed test projects, scenarios, tools, and gates | Proposed baseline |
+| [Testing strategy](testing-strategy.md) | Test projects, test platform, scenarios, tools, and gates | Baseline; Server integration tests run on Microsoft Testing Platform |
 | [Library guide](library-guide.md) | Confirmed Wolverine, Mapster, and FluentValidation; persistence and package timing | Stack decisions confirmed; package timing planned |
 | [Delivery plan](delivery-plan.md) | Phases, ordered work packages, dependencies, acceptance evidence, and release gates | Actionable plan; dates and estimates intentionally unset |
 | [Decisions](decisions.md) | Decision state and unresolved product questions | Living log |
@@ -33,3 +33,5 @@ This is a **pre-production baseline** updated 2026-10-06. It specifies an implem
 ## Change policy
 
 Each behavior should have one home: rules in game design, numeric constants in balance, presentation in experience and content, technical contracts in technical design. Cross-link instead of copying entire sections. Record new decisions and their rationale in the decision log. Move a proposal to **confirmed** only after the creator approves it or implementation makes it an explicit agreed project choice.
+
+Work-package design specs and implementation plans live in `docs/superpowers/specs/` and `docs/superpowers/plans/`. They record how a package was built; the documents above stay authoritative for rules and contracts.

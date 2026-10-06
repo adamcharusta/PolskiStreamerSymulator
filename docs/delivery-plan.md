@@ -1,6 +1,6 @@
 # Delivery plan
 
-This plan orders work; dates, estimates, and team size are not yet committed. A .NET 10 / Blazor solution skeleton exists, but no game behavior has been implemented. The phases define outcomes; the work packages below make them actionable. A package is complete only when its stated evidence exists. Infrastructure preparation may run alongside game work, but production rollout waits for the release gates.
+This plan orders work; dates, estimates, and team size are not yet committed. Work package F1 is complete: the ASP.NET Core Server hosts the Blazor client and health endpoints. No game behavior has been implemented yet. The phases define outcomes; the work packages below make them actionable. A package is complete only when its stated evidence exists. Infrastructure preparation may run alongside game work, but production rollout waits for the release gates.
 
 ## Phase 0 — confirm the foundation
 
@@ -70,6 +70,8 @@ The package IDs express the recommended implementation order. Dependencies refer
 | R2 | Run automated balance sweeps and human playtests across calm, mixed, and high-drama careers | M1, M2, R1 | Reports show event frequency, repetition, cash trajectory, score components, and dominant choices; tuning changes are versioned and documented |
 | R3 | Prepare and rehearse the VPS/k3s/Ansible deployment, manual GitHub Actions rollout, TLS, encrypted second-machine backups, and restore | F1, M4 | A staging deployment and restore rehearsal pass; daily and pre-change backup jobs, monitoring, and 30-day backup retention are verified |
 | R4 | Finish privacy and consent review, operational retention checks, accessibility/regression checks, and release sign-off | M3, M5, M6, R2, R3 | The product-brief acceptance criteria pass on the release build; the owner approves the release candidate before production rollout |
+
+**Progress:** F1 was completed on 2026-10-06; its design spec and implementation plan are in `docs/superpowers/`. The health-endpoint integration test planned for F3 was written in F1 under test-driven development, so F3 still owes the CI build and test gate.
 
 The **first playable checkpoint** is F1–F3 and S1–S4. It uses a small bilingual event fixture and one complete browser loop, not the full release catalogue. The **full-game checkpoint** is M1–M6, with the 52-week career, all endings, local saves, admin publishing, language support, and aggregate telemetry. R1–R4 are release gates, not prerequisites for starting simulation work. Exact event count, balance tuning, backup transfer details, and privacy review remain tracked in [decisions](decisions.md); none blocks the first playable checkpoint.
 
