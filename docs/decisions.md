@@ -63,6 +63,7 @@ This is the canonical record of choices that affect scope or implementation. **C
 | D-57 | Follow-up priority | Confirmed | A flagged story follow-up has the same selection priority as an ordinary event when both pass their occurrence rolls. It is not guaranteed and receives no priority boost. |
 | D-58 | Save export/import | Confirmed | Include local file export and import of browser career saves in the first version. Validate imported state and confirm before overwriting a slot; no server-side player save is added. |
 | D-59 | Additional early endings | Confirmed | The first version includes permanent ban (`permanent_ban`) and channel closure (`channel_closed`) as defeats, and retirement from streaming (`retired`) as a neutral ending, on rolled event outcomes. If the same response also reaches bankruptcy, the recap uses bankruptcy as the primary ending reason. |
+| D-60 | Test platform | Confirmed | Tests use xUnit through the `xunit.v3` 4.x packages on Microsoft Testing Platform v2. `PolskiStreamerSymulatorApp/global.json` switches `dotnet test` to that mode, so tests run from `PolskiStreamerSymulatorApp/`. The creator delegated this choice during F1; the fallback is the `xunit.v3.mtp-off` package in VSTest mode. Details are in `testing-strategy.md`. |
 
 ## Questions to resolve before or during implementation
 

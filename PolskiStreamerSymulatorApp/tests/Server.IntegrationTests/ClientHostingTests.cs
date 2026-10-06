@@ -60,6 +60,7 @@ public sealed partial class ClientHostingTests(WebApplicationFactory<Program> fa
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+        Assert.True(response.Headers.CacheControl?.NoCache == true, $"{path} must be served with Cache-Control: no-cache.");
 
         string body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Contains("<div id=\"app\">", body, StringComparison.Ordinal);
@@ -67,6 +68,6 @@ public sealed partial class ClientHostingTests(WebApplicationFactory<Program> fa
         return body;
     }
 
-    [GeneratedRegex(@"(?:href|src)=""(?<path>(?!https?:|//|#|\.)[^""]+)""")]
+    [GeneratedRegex(@"(?:href|src)=""(?<path>(?![a-zA-Z][a-zA-Z0-9+.-]*:|//|#)[^""]+)""")]
     private static partial Regex LocalAssetReference();
 }

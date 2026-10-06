@@ -17,6 +17,9 @@ if (app.Environment.IsDevelopment())
 
 app.MapHealthEndpoints();
 app.MapStaticAssets();
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("index.html", new StaticFileOptions
+{
+    OnPrepareResponse = static context => context.Context.Response.Headers.CacheControl = "no-cache",
+});
 
 app.Run();

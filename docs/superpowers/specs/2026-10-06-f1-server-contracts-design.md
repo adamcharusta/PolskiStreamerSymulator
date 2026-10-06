@@ -109,7 +109,7 @@ The client therefore uses the classic host page that works with any server:
 
 - `BlazorApp.csproj` drops `<OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>`.
 - `wwwroot/index.html` loads `<script src="_framework/blazor.webassembly.js"></script>` and drops the `<link rel="preload" id="webassembly" />` and `<script type="importmap"></script>` placeholders.
-- `MapStaticAssets` still serves every framework file with compression and ETags. The only loss is fingerprinted cache busting for the boot script, which browsers now revalidate with its ETag instead.
+- `MapStaticAssets` still serves every framework file with compression and ETags. The losses are fingerprinted cache busting for the boot script, which browsers now revalidate with its ETag instead, and the build-time preload hints for framework files.
 
 The probe confirmed that the published Server, run in Production, starts the client in headless Chrome and renders the Home page.
 

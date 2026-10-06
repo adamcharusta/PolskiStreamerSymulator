@@ -17,7 +17,7 @@ In this mode, pass a solution with `--solution` and a single project with `--pro
 | `tests/Domain.Tests` | `Domain` | Fast deterministic rules and property-style invariants |
 | `tests/Application.Tests` | `Application`, `Domain` | CQRS handler orchestration with fake ports and controlled RNG |
 | `tests/Infrastructure.IntegrationTests` | `Infrastructure`, `Application`, `Domain` | Real SQLite catalogue and analytics databases, migrations, draft validation, audit, and published-version behavior |
-| `tests/Server.IntegrationTests` | `Server`, `Contracts` | Stateless gameplay HTTP contract, admin authentication and authorization, DI composition, Wolverine handler discovery, error mapping |
+| `tests/Server.IntegrationTests` | `Server`, `Contracts` | Health probe semantics and client hosting (in place since F1); later the stateless gameplay HTTP contract, admin authentication and authorization, DI composition, Wolverine handler discovery, error mapping |
 | `tests/BlazorApp.ComponentTests` | `BlazorApp`, `Contracts` | Player and admin component behavior, browser-save adapter, and accessible form feedback with bUnit |
 | `tests/E2E.Tests` | No production project reference required | Browser flow across the hosted app with Playwright for .NET |
 
