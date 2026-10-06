@@ -11,6 +11,7 @@ This is a selection guide, not a dependency-install checklist. The solution curr
 | [System.Text.Json](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/overview) | Use built-in | API and versioned save serialization; avoid another JSON package without a concrete gap |
 | `ILogger<T>`, health checks, Problem Details; `Microsoft.AspNetCore.OpenApi` when an OpenAPI document is needed | Prefer Microsoft ASP.NET Core facilities | Diagnostics and HTTP contracts before adding third-party logging or API packages |
 | [bUnit](https://bunit.dev/docs/getting-started/) and [Playwright](https://playwright.dev/dotnet/docs/intro) | Add with UI tests | Component-level and browser-level confidence |
+| `Microsoft.AspNetCore.Components.WebAssembly.Server` | Adopted with the Server in F1 | `UseWebAssemblyDebugging` for client debugging in Development; `MapStaticAssets` serves the client files, so `UseBlazorFrameworkFiles` is not used |
 
 ## Packages to defer
 

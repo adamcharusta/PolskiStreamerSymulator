@@ -29,4 +29,4 @@ This file is a navigation map for contributors and coding agents. The authoritat
 - Update the relevant document when changing behavior. Keep `CLAUDE.md` and this file as indexes.
 - Keep documentation and code comments in English. Provide player-facing text in Polish and English, and keep it outside simulation logic.
 - Treat the linked football simulator as inspiration for the career loop only. Create original writing, visuals, event data, and code.
-- Do not claim a feature is implemented because it appears in the specification. `PolskiStreamerSymulatorApp/` currently contains only a .NET/Blazor skeleton.
+- Do not claim a feature is implemented because it appears in the specification. `PolskiStreamerSymulatorApp/` currently contains the project skeleton: an ASP.NET Core `Server` that hosts the Blazor client and health endpoints, with no game behavior yet.

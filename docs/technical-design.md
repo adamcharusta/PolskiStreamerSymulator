@@ -2,11 +2,11 @@
 
 ## Observed solution and approved direction
 
-The repository contains a .NET 10 solution under `PolskiStreamerSymulatorApp/`. `global.json` requests SDK `10.0.201` with `latestFeature` roll-forward; the installed `10.0.401` SDK built the original skeleton successfully on 2026-10-04. Current projects are `Domain`, `Application`, `Infrastructure`, and standalone Blazor WebAssembly `BlazorApp`. Central package management and warnings-as-errors are enabled.
+The repository contains a .NET 10 solution under `PolskiStreamerSymulatorApp/`. `global.json` requests SDK `10.0.201` with `latestFeature` roll-forward and switches `dotnet test` to its Microsoft Testing Platform mode; the installed `10.0.401` SDK builds the solution. The projects are `Domain`, `Application`, `Infrastructure`, `Contracts`, the ASP.NET Core `Server`, the standalone Blazor WebAssembly `BlazorApp`, and `tests/Server.IntegrationTests`. Central package management and warnings-as-errors are enabled.
 
-The creator confirmed a CQRS architecture and an **ASP.NET Core server**. The server hosts the WebAssembly client, runs Wolverine handlers, and reads a SQLite game catalogue containing events, weekly-action outcome data, versioned numeric parameters, and streamer-name parts. **Career state and saves stay in the browser; no player or run records go into SQLite.** The server and contract projects below are target architecture, not existing code.
+The creator confirmed a CQRS architecture and an **ASP.NET Core server**. The server hosts the WebAssembly client, runs Wolverine handlers, and reads a SQLite game catalogue containing events, weekly-action outcome data, versioned numeric parameters, and streamer-name parts. **Career state and saves stay in the browser; no player or run records go into SQLite.** The `Server` and `Contracts` projects exist since work package F1. The Server hosts the client and the health endpoints; Wolverine handlers and the SQLite catalogue arrive in later packages.
 
-## Target project graph
+## Project graph
 
 ```text
 Domain                 (no project references)
@@ -17,7 +17,7 @@ Server ---------------> Application, Infrastructure, Contracts, BlazorApp
 BlazorApp ------------> Contracts
 ```
 
-`Contracts` and `Server` are proposed new projects. `Server` is the ASP.NET Core composition root and API host; `BlazorApp` remains a WebAssembly view. The public game and its API share `polskistreamersymulator.pl`; the owner-only admin UI and admin APIs use `admin.polskistreamersymulator.pl`. Both hostnames may route to the same server pod, with host-based endpoint separation and server-side authorization for every admin operation. [Microsoft documents](https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly/?view=aspnetcore-10.0) hosted WebAssembly.
+`Server` is the ASP.NET Core composition root and API host; `BlazorApp` remains a WebAssembly view. The public game and its API share `polskistreamersymulator.pl`; the owner-only admin UI and admin APIs use `admin.polskistreamersymulator.pl`. Both hostnames may route to the same server pod, with host-based endpoint separation and server-side authorization for every admin operation. `Server` references `BlazorApp` and serves its static web assets with `MapStaticAssets`, falling back to `index.html` for client routes. Microsoft's .NET 10 documentation covers standalone static hosting and Blazor Web Apps rather than this hosted shape, but its [static files guidance](https://learn.microsoft.com/en-us/aspnet/core/blazor/fundamentals/static-files?view=aspnetcore-10.0) confirms that `MapStaticAssets` replaces `UseBlazorFrameworkFiles` for WebAssembly framework files. The client keeps the classic `index.html`, which loads `_framework/blazor.webassembly.js`. With `OverrideHtmlAssetPlaceholders`, a publish through the Server ships unprocessed placeholders and the client cannot start, so fingerprinted boot script names stay off until the SDK supports this case.
 
 | Project | Owns | Does not own |
 | --- | --- | --- |

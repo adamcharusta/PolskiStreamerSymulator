@@ -2,7 +2,7 @@
 
 ## Status
 
-This is a **pre-production baseline** updated 2026-10-05. It specifies an implementable first version, while marking choices that still need the creator's confirmation. `PolskiStreamerSymulatorApp/` contains a .NET 10 / Blazor WebAssembly skeleton, but no game behavior or server project yet.
+This is a **pre-production baseline** updated 2026-10-06. It specifies an implementable first version, while marking choices that still need the creator's confirmation. `PolskiStreamerSymulatorApp/` contains an ASP.NET Core server that hosts the Blazor WebAssembly client and health endpoints, but no game behavior yet.
 
 | Document | Authoritative for | Status |
 | --- | --- | --- |

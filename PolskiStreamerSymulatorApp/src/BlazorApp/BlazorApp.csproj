@@ -3,7 +3,6 @@
   <PropertyGroup>
     <RootNamespace>PolskiStreamerSymulatorApp.BlazorApp</RootNamespace>
     <AssemblyName>PolskiStreamerSymulatorApp.BlazorApp</AssemblyName>
-    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
   </PropertyGroup>
 
   <ItemGroup>
