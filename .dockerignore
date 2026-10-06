@@ -6,7 +6,7 @@
 **/bin
 **/obj
 **/artifacts
-.publish-check
+**/.publish-check
 **/TestResults
 **/*.db
 **/*.db-*
