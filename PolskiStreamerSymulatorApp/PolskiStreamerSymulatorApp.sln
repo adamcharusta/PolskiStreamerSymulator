@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "src\Server\Server
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.IntegrationTests", "tests\Server.IntegrationTests\Server.IntegrationTests.csproj", "{424EBE80-33BB-4C61-ACD3-B9D4611D7693}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Tests", "tests\Domain.Tests\Domain.Tests.csproj", "{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +122,18 @@ Global
 		{424EBE80-33BB-4C61-ACD3-B9D4611D7693}.Release|x64.Build.0 = Release|Any CPU
 		{424EBE80-33BB-4C61-ACD3-B9D4611D7693}.Release|x86.ActiveCfg = Release|Any CPU
 		{424EBE80-33BB-4C61-ACD3-B9D4611D7693}.Release|x86.Build.0 = Release|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Debug|x64.Build.0 = Debug|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Debug|x86.Build.0 = Debug|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Release|x64.ActiveCfg = Release|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Release|x64.Build.0 = Release|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Release|x86.ActiveCfg = Release|Any CPU
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,5 +146,6 @@ Global
 		{F30FF083-E9A9-40F9-AC4E-758EAFF87E4D} = {696D2CA8-E99D-4C11-B7C6-B489483D15A5}
 		{34A100F0-4662-4D0C-BA78-E7DBFBC37B2C} = {696D2CA8-E99D-4C11-B7C6-B489483D15A5}
 		{424EBE80-33BB-4C61-ACD3-B9D4611D7693} = {9CDC27D8-C88B-427D-8192-FCACB9D18F77}
+		{ED5D0EC3-22D9-4616-8E7A-3B4430F50A48} = {9CDC27D8-C88B-427D-8192-FCACB9D18F77}
 	EndGlobalSection
 EndGlobal
