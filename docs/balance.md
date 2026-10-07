@@ -25,7 +25,7 @@ Treat the weekly action, its rolled outcome, and the regular subscription settle
 1. Validate that a weekly action or event response is available. The player may pay its guaranteed cost using debt even if current money is below the cost or the cost temporarily crosses the pinned bankruptcy threshold. An automatic event encounter cost is unavoidable after that event is selected and may create debt or end the run immediately.
 2. Record any stated weekly-action or response cost as an expense and subtract it once before that choice's outcome roll. A cost is not a random consequence.
 3. Read the choice's immutable, ordered outcomes. Their `ChanceBps` values must sum to exactly 10,000; each value is an integer from 0 to 10,000.
-4. Consume one value in `[0, 9999]` from the saved seeded PRNG. Select the outcome whose cumulative interval contains that value. Apply its categorized cash-flow entries and viewer/drama deltas once.
+4. Consume one value in `[0, 9999]` from the saved seeded PRNG: the unbiased bounded draw of the PCG32 generator with bound 10,000. Select the outcome whose cumulative interval contains that value. Apply its categorized cash-flow entries and viewer/drama deltas once.
 5. Record the pre-choice state, choice ID, roll, outcome ID, cash-flow entries, and actual deltas in the report and browser save. A retry with the same state and choice returns the same result.
 
 ## Cash-flow accounting
@@ -37,7 +37,7 @@ Treat the weekly action, its rolled outcome, and the regular subscription settle
 | Subscriptions | Income | One weekly settlement, including quiet weeks |
 | Expenses | Outflow | Guaranteed choice cost, operating bill, or event loss |
 
-Each cash-flow entry has a category, positive magnitude in whole PLN, signed effect on money, week, and source action/event/outcome ID. A result may contain several entries. No outcome can mutate money without one of these entries. Subtotals are non-negative; expenses are subtracted when calculating net money.
+Each cash-flow entry has a category, a magnitude in whole PLN, a signed effect on money, a week, and a step that points to the week's action or event record, which names the source action, event, and outcome. Magnitudes are positive, except that the weekly subscription entry is recorded even when it pays 0 PLN. A result may contain several entries. No outcome can mutate money without one of these entries. Subtotals are non-negative; expenses are subtracted when calculating net money.
 
 Illustration: opening money 1,500 PLN, sponsors 200 PLN, donations 35 PLN, subscriptions 18 PLN, and expenses 60 PLN yields closing money **1,693 PLN**. These numbers are a ledger example, not approved payouts.
 

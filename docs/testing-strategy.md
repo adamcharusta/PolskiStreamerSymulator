@@ -14,14 +14,14 @@ In this mode, pass a solution with `--solution` and a single project with `--pro
 
 | Project | References | Test purpose |
 | --- | --- | --- |
-| `tests/Domain.Tests` | `Domain` | Fast deterministic rules and property-style invariants |
+| `tests/Domain.Tests` | `Domain` | Random generator, streamer names, parameter and run-state validation (in place since F2); later fast deterministic rules and property-style invariants |
 | `tests/Application.Tests` | `Application`, `Domain` | CQRS handler orchestration with fake ports and controlled RNG |
 | `tests/Infrastructure.IntegrationTests` | `Infrastructure`, `Application`, `Domain` | Real SQLite catalogue and analytics databases, migrations, draft validation, audit, and published-version behavior |
-| `tests/Server.IntegrationTests` | `Server`, `Contracts` | Health probe semantics and client hosting (in place since F1); later the stateless gameplay HTTP contract, admin authentication and authorization, DI composition, Wolverine handler discovery, error mapping |
+| `tests/Server.IntegrationTests` | `Server`, `Contracts` | Health probe semantics and client hosting (in place since F1) and the contracts' JSON wire format (since F2); later the stateless gameplay HTTP contract, admin authentication and authorization, DI composition, Wolverine handler discovery, error mapping |
 | `tests/BlazorApp.ComponentTests` | `BlazorApp`, `Contracts` | Player and admin component behavior, browser-save adapter, and accessible form feedback with bUnit |
 | `tests/E2E.Tests` | No production project reference required | Browser flow across the hosted app with Playwright for .NET |
 
-`Server.IntegrationTests` exists since work package F1. Add the other projects with the first behavior they verify.
+`Server.IntegrationTests` exists since work package F1 and `Domain.Tests` since F2. Add the other projects with the first behavior they verify.
 
 `Domain.Tests` and `Application.Tests` should run on every change. Provider and server integration tests should run in CI and before merging persistence or API changes. Browser E2E tests cover a few critical journeys, not every arithmetic branch. Balance sweeps can live in `Domain.Tests` under a separate trait and run before release or nightly, so a 1,000-seed test does not slow every edit.
 
