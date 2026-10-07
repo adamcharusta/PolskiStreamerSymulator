@@ -6,13 +6,14 @@ namespace PolskiStreamerSymulatorApp.Contracts.Serialization;
 
 /// <summary>
 /// The single JSON format of the contracts: camelCase names, every property required, nulls only where declared,
-/// unknown properties rejected. Enum names and hexadecimal numbers come from converters declared on the types.
+/// unknown and duplicate properties rejected. Enum names and hexadecimal numbers come from converters declared on the types.
 /// </summary>
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     RespectNullableAnnotations = true,
     RespectRequiredConstructorParameters = true,
-    UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow)]
+    UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+    AllowDuplicateProperties = false)]
 [JsonSerializable(typeof(RunStateDto))]
 [JsonSerializable(typeof(PlanWeekRequest))]
 [JsonSerializable(typeof(ChooseEventOptionRequest))]

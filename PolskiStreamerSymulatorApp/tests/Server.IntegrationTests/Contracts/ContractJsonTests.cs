@@ -23,6 +23,11 @@ public sealed class ContractJsonTests
         { "unknown property", "{\"schemaVersion\"", "{\"extra\":1,\"schemaVersion\"" },
         { "numeric enum", "\"status\":\"pendingWeek\"", "\"status\":1" },
         { "unknown enum name", "\"status\":\"pendingWeek\"", "\"status\":\"paused\"" },
+        { "enum comma list of defined names", "\"status\":\"pendingWeek\"", "\"status\":\"pendingWeek, completed\"" },
+        { "enum comma list of an undefined value", "\"status\":\"pendingWeek\"", "\"status\":\"bankrupt, specialEnding\"" },
+        { "padded enum name", "\"status\":\"pendingWeek\"", "\"status\":\" pendingWeek\"" },
+        { "wrong-case enum name", "\"status\":\"pendingWeek\"", "\"status\":\"PendingWeek\"" },
+        { "duplicate property", "\"week\":2,\"status\"", "\"week\":2,\"week\":7,\"status\"" },
         { "short hexadecimal", "\"seed\":\"000000000000002a\"", "\"seed\":\"2a\"" },
         { "uppercase hexadecimal", "\"seed\":\"000000000000002a\"", "\"seed\":\"000000000000002A\"" },
         { "numeric generator value", "\"seed\":\"000000000000002a\"", "\"seed\":42" },
@@ -135,6 +140,12 @@ public sealed class ContractJsonTests
                 enumType.GetFields(BindingFlags.Public | BindingFlags.Static),
                 static member => Assert.NotNull(member.GetCustomAttribute<JsonStringEnumMemberNameAttribute>()));
         }
+    }
+
+    [Fact]
+    public void WritingAValueThatIsNotADefinedMemberThrows()
+    {
+        Assert.Throws<JsonException>(() => JsonSerializer.Serialize((RunStatusDto)7, ContractsJsonContext.Default.RunStatusDto));
     }
 
     private static void AssertWireName<T>(T value, string name, JsonTypeInfo<T> typeInfo)
