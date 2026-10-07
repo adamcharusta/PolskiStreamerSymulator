@@ -199,6 +199,26 @@ public sealed class RunStateValidatorTests
         Assert.Contains(RunStateErrorCodes.MoneyNotReconciled, result.Errors.Select(error => error.Code));
     }
 
+    [Fact]
+    public void BankruptRunWhoseUnansweredEventHasNoEncounterCostIsUnanswered()
+    {
+        // The 60 PLN moves from an encounter cost to a weekly action cost, so money still reconciles.
+        RunState state = RunStateFixtures.Bankrupt() with
+        {
+            Ledger =
+            [
+                RunStateFixtures.Subscription(1, 2),
+                new CashFlowEntry(1, 0, CashFlowSource.WeeklyActionCost, 0, CashFlowCategory.Expenses, 60),
+            ],
+        };
+        GameParameters parameters = RunStateFixtures.InDebtParameters;
+
+        RunStateValidation result = RunStateValidator.Validate(state, parameters);
+
+        RunStateError error = Assert.Single(result.Errors);
+        Assert.Equal(new RunStateError(RunStateErrorCodes.UnansweredEvent, "history[0].events[0]"), error);
+    }
+
     private static (RunState State, GameParameters Parameters) ValidFixture(string name)
     {
         return name switch

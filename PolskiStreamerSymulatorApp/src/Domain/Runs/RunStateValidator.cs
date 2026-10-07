@@ -209,7 +209,8 @@ public static class RunStateValidator
             ValidateSelection(resolution.EventId, resolution.Index, i + 1, path, passing, selected, errors);
             if (resolution.Response is null)
             {
-                bool bankruptAtEncounter = week.IsFinal && isLastEvent && state.Status == RunStatus.Bankrupt;
+                bool bankruptAtEncounter = week.IsFinal && isLastEvent && state.Status == RunStatus.Bankrupt
+                    && HasEncounterCost(state, week.Week, i + 1);
                 if (!bankruptAtEncounter)
                 {
                     errors.Add(new RunStateError(RunStateErrorCodes.UnansweredEvent, path));
@@ -240,6 +241,20 @@ public static class RunStateValidator
                 errors.Add(new RunStateError(RunStateErrorCodes.EndingInconsistent, "ending.reasonCode"));
             }
         }
+    }
+
+    /// <summary>Only an event whose encounter cost was paid can have bankrupted the run before it was answered.</summary>
+    private static bool HasEncounterCost(RunState state, int week, int step)
+    {
+        foreach (CashFlowEntry entry in state.Ledger)
+        {
+            if (entry.Source == CashFlowSource.EncounterCost && entry.Week == week && entry.Step == step)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static HashSet<string> ValidateEncounterRolls(WeekView week, List<RunStateError> errors)
