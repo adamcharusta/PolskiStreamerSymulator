@@ -41,6 +41,8 @@ public sealed class StreamerNameTests
         Assert.True(valid);
         Assert.NotEqual(decomposed, composed);
         Assert.Equal(composed, normalized);
+        Assert.False(StreamerName.IsNormalizedValid(decomposed));
+        Assert.True(StreamerName.IsNormalizedValid(composed));
     }
 
     [Fact]
@@ -54,7 +56,7 @@ public sealed class StreamerNameTests
     public void CountsALetterWithACombiningMarkAsOneDisplayedCharacter()
     {
         // q with a combining acute accent has no composed form, so each pair stays two UTF-16 code units.
-        string marked = string.Concat(Enumerable.Repeat("q́", 32));
+        string marked = string.Concat(Enumerable.Repeat("q\u0301", 32));
 
         Assert.True(StreamerName.TryNormalize(marked, out string normalized));
         Assert.Equal(64, normalized.Length);
@@ -63,7 +65,7 @@ public sealed class StreamerNameTests
     [Fact]
     public void RejectsNamesLongerThanSixtyFourUtf16CodeUnits()
     {
-        string overlong = "ab" + new string('́', 63);
+        string overlong = "ab" + new string('\u0301', 63);
 
         Assert.False(StreamerName.TryNormalize(overlong, out _));
     }
@@ -79,7 +81,7 @@ public sealed class StreamerNameTests
     [InlineData("Neon!")]
     [InlineData("--")]
     [InlineData("_ -")]
-    [InlineData("́ab")]
+    [InlineData("\u0301ab")]
     public void RejectsInvalidNames(string name)
     {
         bool valid = StreamerName.TryNormalize(name, out string normalized);

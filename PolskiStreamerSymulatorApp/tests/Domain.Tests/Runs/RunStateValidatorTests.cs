@@ -219,6 +219,137 @@ public sealed class RunStateValidatorTests
         Assert.Equal(new RunStateError(RunStateErrorCodes.UnansweredEvent, "history[0].events[0]"), error);
     }
 
+    [Fact]
+    public void FreshRunBeforeWeekOneIsValid()
+    {
+        GameParameters parameters = RunStateFixtures.Parameters;
+        RunState state = new(
+            RulesVersion: RulesVersion.Current,
+            CatalogVersion: 1,
+            RunId: RunStateFixtures.RunId,
+            StreamerName: "NeonBorsuk",
+            Week: 1,
+            Status: RunStatus.Active,
+            MoneyPln: parameters.StartingMoneyPln,
+            Viewers: parameters.StartingViewers,
+            Drama: parameters.StartingDrama,
+            Rng: Pcg32.Seed(42, 54),
+            Ledger: [],
+            History: [],
+            CurrentWeek: null,
+            Flags: [],
+            Ending: null);
+
+        RunStateValidation result = RunStateValidator.Validate(state, parameters);
+
+        Assert.Empty(result.Errors);
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ZeroSubscriptionEntryIsValid()
+    {
+        RunState state = RunStateFixtures.Active() with
+        {
+            MoneyPln = 1_500,
+            Ledger = [RunStateFixtures.Subscription(1, 0)],
+        };
+
+        RunStateValidation result = RunStateValidator.Validate(state, RunStateFixtures.Parameters);
+
+        Assert.Empty(result.Errors);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(4)]
+    public void ZeroAmountOnAnyOtherPendingWeekEntryIsInvalid(int ledgerIndex)
+    {
+        RunState state = RunStateFixtures.PendingWeek();
+        CashFlowEntry[] ledger = [.. state.Ledger];
+        ledger[ledgerIndex] = ledger[ledgerIndex] with { AmountPln = 0 };
+
+        RunStateValidation result = RunStateValidator.Validate(state with { Ledger = ledger }, RunStateFixtures.Parameters);
+
+        Assert.Contains(new RunStateError(RunStateErrorCodes.LedgerAmountInvalid, $"ledger[{ledgerIndex}]"), result.Errors);
+    }
+
+    [Theory]
+    [InlineData(CashFlowSource.ResponseCost, CashFlowCategory.Expenses)]
+    [InlineData(CashFlowSource.ResponseOutcome, CashFlowCategory.Donations)]
+    public void ZeroAmountOnAResponseEntryIsInvalid(CashFlowSource source, CashFlowCategory category)
+    {
+        RunState state = RunStateFixtures.SpecialEnding();
+        CashFlowEntry entry = new(1, 1, source, 0, category, 0);
+
+        RunStateValidation result = RunStateValidator.Validate(
+            state with { Ledger = [.. state.Ledger, entry] },
+            RunStateFixtures.Parameters);
+
+        Assert.Contains(new RunStateError(RunStateErrorCodes.LedgerAmountInvalid, "ledger[1]"), result.Errors);
+    }
+
+    [Fact]
+    public void BankruptRunWhoseFinalResponseCarriesATerminalReasonIsValid()
+    {
+        RunState state = RunStateFixtures.Bankrupt();
+        WeekRecord week = state.History[0];
+        EventResolution answered = week.Events[0] with
+        {
+            Response = Answer() with { ViewersDelta = 0, DramaDelta = 0, TerminalReasonCode = "debt_collapse" },
+        };
+        state = state with { History = [week with { Events = [answered] }] };
+
+        RunStateValidation result = RunStateValidator.Validate(state, RunStateFixtures.InDebtParameters);
+
+        Assert.Empty(result.Errors);
+    }
+
+    [Theory]
+    [InlineData(CashFlowSource.ResponseCost, CashFlowCategory.Expenses)]
+    [InlineData(CashFlowSource.ResponseOutcome, CashFlowCategory.Donations)]
+    public void ResponseEntryOnAnUnansweredEventIsInvalid(CashFlowSource source, CashFlowCategory category)
+    {
+        RunState state = RunStateFixtures.Bankrupt();
+        CashFlowEntry entry = new(1, 1, source, 0, category, 10);
+
+        RunStateValidation result = RunStateValidator.Validate(
+            state with { Ledger = [.. state.Ledger, entry] },
+            RunStateFixtures.InDebtParameters);
+
+        Assert.Contains(new RunStateError(RunStateErrorCodes.LedgerStepInvalid, "ledger[2].step"), result.Errors);
+    }
+
+    [Theory]
+    [InlineData(CashFlowSource.ResponseCost, CashFlowCategory.Expenses)]
+    [InlineData(CashFlowSource.ResponseOutcome, CashFlowCategory.Donations)]
+    public void ResponseEntryOnAStepWithoutAnEventIsInvalid(CashFlowSource source, CashFlowCategory category)
+    {
+        RunState state = RunStateFixtures.Active();
+        CashFlowEntry entry = new(1, 1, source, 0, category, 10);
+
+        RunStateValidation result = RunStateValidator.Validate(
+            state with { Ledger = [.. state.Ledger, entry] },
+            RunStateFixtures.Parameters);
+
+        Assert.Contains(new RunStateError(RunStateErrorCodes.LedgerStepInvalid, "ledger[1].step"), result.Errors);
+    }
+
+    [Fact]
+    public void SpecialEndingWhoseReasonDiffersFromTheFinalResponseIsInconsistent()
+    {
+        RunState state = RunStateFixtures.SpecialEnding() with
+        {
+            Ending = new RunEnding(RunEndingKind.Special, Week: 1, ReasonCode: "other_reason"),
+        };
+
+        RunStateValidation result = RunStateValidator.Validate(state, RunStateFixtures.Parameters);
+
+        RunStateError error = Assert.Single(result.Errors);
+        Assert.Equal(new RunStateError(RunStateErrorCodes.EndingInconsistent, "ending.reasonCode"), error);
+    }
+
     private static (RunState State, GameParameters Parameters) ValidFixture(string name)
     {
         return name switch

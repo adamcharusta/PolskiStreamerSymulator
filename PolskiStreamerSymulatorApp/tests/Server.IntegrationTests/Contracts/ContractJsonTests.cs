@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using PolskiStreamerSymulatorApp.Contracts.Runs;
@@ -61,6 +62,33 @@ public sealed class ContractJsonTests
     {
         string malformed = PendingWeekJson.Replace(original, replacement, StringComparison.Ordinal);
         Assert.True(malformed != PendingWeekJson, $"The '{description}' case did not change the JSON.");
+
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(malformed, ContractsJsonContext.Default.RunStateDto));
+    }
+
+    [Theory]
+    [InlineData("pendingWeek", "ledger")]
+    [InlineData("pendingWeek", "history/0/encounterRolls")]
+    [InlineData("pendingWeek", "history/0/events")]
+    [InlineData("pendingWeek", "currentWeek/encounterRolls")]
+    [InlineData("pendingWeek", "currentWeek/resolvedEvents")]
+    [InlineData("pendingWeek", "flags")]
+    [InlineData("pendingWeek", "history")]
+    [InlineData("specialEnding", "history/0/events/0/response/flagChanges")]
+    public void NullElementInAnyListIsRejected(string fixture, string arrayPath)
+    {
+        RunStateDto state = fixture == "pendingWeek" ? ContractFixtures.PendingWeek() : ContractFixtures.SpecialEnding();
+        string json = JsonSerializer.Serialize(state, ContractsJsonContext.Default.RunStateDto);
+        JsonNode node = JsonNode.Parse(json)!;
+        JsonNode? target = node;
+        foreach (string segment in arrayPath.Split('/'))
+        {
+            target = target is JsonArray array ? array[int.Parse(segment)] : target![segment];
+        }
+
+        target!.AsArray().Add(null);
+        string malformed = node.ToJsonString();
+        Assert.True(malformed != json, $"The '{arrayPath}' case did not change the JSON.");
 
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(malformed, ContractsJsonContext.Default.RunStateDto));
     }
