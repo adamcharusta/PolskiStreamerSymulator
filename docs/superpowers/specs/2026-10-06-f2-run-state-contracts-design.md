@@ -261,3 +261,11 @@ All new code is written test-first.
 - **Strict JSON blocks forward compatibility.** That is intended: any shape change raises `SaveSchema.CurrentVersion`, and M3 decides whether old saves migrate.
 - **The validator grows with the engine.** S1 and S3 may add rules. Each rule stays one row in the table above and one test.
 - **Deferred event definitions** could pressure the ledger shape. The six source kinds already cover encounter costs, response costs, and response outcomes, so S3 should only add definitions, not change saved entries.
+
+## Carry-forward to S1 and S2
+
+- Records compare list members by reference, so S1 needs a structural comparison, or comparison through JSON, to test equality of states.
+- `default(TerminalClassification)` is `Success`, so the S2 loader must never rely on a default value.
+- `CashFlowAmount` can carry `Subscriptions` or a negative amount, so the S2 loader and catalogue validation must reject both.
+- `ValidatedRunState` aliases the caller's lists, so S1 must not keep or mutate input lists, and S4 mapping builds fresh lists.
+- A flag `SetWeek` equal to an unplayed current week is accepted today, and S3 decides the flag window rules.

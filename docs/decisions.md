@@ -79,6 +79,7 @@ This is the canonical record of choices that affect scope or implementation. **C
 8. Verify the proposed two-file SQLite layout, persistent-volume mount, backup procedure, and VPS disk headroom before production deployment.
 9. Review Polish and English event translations before publication; both are required for the first version.
 10. Set the first-release event count after scope and content-production estimates; 200–400 is under consideration, not yet a commitment.
+11. Streamer names made only of default-ignorable or invisible-but-allowed characters can render blank, for example a letter followed by U+FE0F, or Hangul filler letters. Should name validation reject them? Names are always rendered as escaped text, so this is a presentation question, not a security issue.
 
 ## Decision procedure
 

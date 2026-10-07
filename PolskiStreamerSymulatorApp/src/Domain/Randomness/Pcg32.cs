@@ -1,7 +1,7 @@
 namespace PolskiStreamerSymulatorApp.Domain.Randomness;
 
 /// <summary>
-/// PCG32 (XSH-RR 64/32) as published in pcg_basic.c by Melissa O'Neill. Every gameplay roll comes from this generator.
+/// PCG32 (XSH-RR 64/32) as published in pcg_basic.c by Melissa O'Neill. This port follows that file, which is published under the Apache License 2.0 (or MIT); this note is attribution, not legal advice. Every gameplay roll comes from this generator.
 /// </summary>
 public sealed class Pcg32
 {
