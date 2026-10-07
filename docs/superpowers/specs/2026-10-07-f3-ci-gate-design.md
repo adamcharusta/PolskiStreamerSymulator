@@ -106,9 +106,13 @@ Why the job starts the container instead of only building it: F1's entrypoint bu
 
 A workflow cannot be developed test-first the way code can. Verification therefore has four layers:
 
-1. **Static check.** Run `actionlint`, through its Docker image `rhysd/actionlint`, against `.github/workflows/ci.yml` and `deploy.yml`, and expect no findings.
+1. **Static check.** Run the released `actionlint` binary, version 1.7.12 or later, against `.github/workflows/ci.yml` and `deploy.yml`, and expect no findings.
 2. **Clean-clone rehearsal.** Clone the branch into a temporary folder and run the `build-and-test` steps from it in order. Then run the `container` steps, including the health and client-page checks, with local Docker. Every step must succeed.
-3. **Failure-path reasoning.** `dotnet format --verify-no-changes`, `dotnet build`, `dotnet test`, and `curl --fail` each exit with a non-zero code on failure, which fails the step. The creator chose not to push a deliberately broken commit.
+3. **Local failure rehearsal.** In the temporary clone only:
+   - the client-page check, run against `/health/live`, must fail;
+   - an image rebuilt with F1's wrong `ENTRYPOINT` must build but fail the liveness wait.
+
+   The format, build, and test steps fail through their non-zero exit codes. The creator chose not to push a deliberately broken commit.
 4. **First GitHub run.** Push `feature/f3-ci-gate` to `origin` and watch the run with `gh run watch`. Both jobs must be green. If the runner warns about the Node.js runtime of the pinned actions, record that as a follow-up for both workflows; do not fix it here.
 
 ## Documentation updates
