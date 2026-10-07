@@ -162,7 +162,7 @@ The repeat-policy view of past encounters comes from the events in `History` and
 | `event_selected_twice` | An event appears at most once per week |
 | `encounter_rolled_twice` | An event has at most one encounter roll per week |
 | `selected_event_without_passing_roll` | Every selected event has a passing encounter roll in its week |
-| `unanswered_event` | Every event has a response, except the last event of the final week of a `Bankrupt` run |
+| `unanswered_event` | Every event has a response, except the last event of the final week of a `Bankrupt` run, and only when the ledger holds an `EncounterCost` entry for that week and that event's step |
 | `terminal_reason_not_applied` | No response carries a terminal reason except the last response of the final week of a `Bankrupt` or `SpecialEnding` run; a `Completed` run has none, because a special ending in the final week ends the run before completion |
 | `roll_out_of_range` | Every action, encounter, and response roll is 0 to 9,999 |
 | `ledger_week_out_of_range` | Every entry's week has a week record in `History` or `CurrentWeek` |
