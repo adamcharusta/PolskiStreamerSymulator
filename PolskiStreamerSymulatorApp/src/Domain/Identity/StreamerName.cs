@@ -23,7 +23,17 @@ public static class StreamerName
             return false;
         }
 
-        string candidate = input.Normalize(NormalizationForm.FormC).Trim();
+        string candidate;
+        try
+        {
+            candidate = input.Normalize(NormalizationForm.FormC).Trim();
+        }
+        catch (ArgumentException)
+        {
+            // string.Normalize rejects text that is not valid UTF-16, such as an unpaired surrogate or U+FFFE.
+            return false;
+        }
+
         if (candidate.Length > MaxUtf16Length || !HasOnlyAllowedCharacters(candidate))
         {
             return false;

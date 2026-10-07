@@ -89,6 +89,25 @@ public sealed class StreamerNameTests
     }
 
     [Fact]
+    public void RejectsTextThatIsNotValidUtf16()
+    {
+        string[] names =
+        [
+            "ab" + (char)0xD800,
+            (char)0xDC00 + "ab",
+            "a" + (char)0xD800 + "b",
+            "ab" + (char)0xFFFE + "cd",
+        ];
+
+        Assert.All(names, static name =>
+        {
+            Assert.False(StreamerName.TryNormalize(name, out string normalized));
+            Assert.Equal(string.Empty, normalized);
+            Assert.False(StreamerName.IsNormalizedValid(name));
+        });
+    }
+
+    [Fact]
     public void RejectsNull()
     {
         Assert.False(StreamerName.TryNormalize(null, out _));
