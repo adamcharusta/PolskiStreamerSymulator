@@ -4,7 +4,7 @@
 | --- | --- |
 | Work package | F2 in the [delivery plan](../../delivery-plan.md) |
 | Date | 2026-10-06 |
-| Status | Proposed, awaiting the creator's review |
+| Status | Approved by the creator on 2026-10-07. Planning added two rules: arrays reject null elements, and reconciliation must not wrap around 64 bits. |
 | Authoritative documents | [Technical design](../../technical-design.md), [game design](../../game-design.md), [balance](../../balance.md), [event system](../../event-system.md), [streamer name generation](../../streamer-name-generation.md), [testing strategy](../../testing-strategy.md) |
 
 This spec records how F2 will be built. The documents above stay authoritative for rules and contracts, and the implementation updates them.
@@ -176,6 +176,8 @@ The repeat-policy view of past encounters comes from the events in `History` and
 | `drama_not_reconciled` | `Drama` equals `StartingDrama` plus every action and response drama delta |
 | `flag_invalid` | Flag IDs are unique and each `SetWeek` is 1 to `Week` |
 
+The validator assumes non-null lists and members, which the strict JSON contract guarantees before mapping. It sums money in 128-bit arithmetic, so huge tampered amounts cannot wrap around and reconcile by accident.
+
 The validator deliberately checks totals and structure, not a full replay: it does not recompute clamping step by step or prove that every historical checkpoint obeyed the bankruptcy rule. The player owns the save, so the goal is a consistent state the engine can continue, not anti-cheat protection.
 
 ### Wire contracts
@@ -201,6 +203,7 @@ JSON conventions, applied by one source-generated `ContractsJsonContext`:
 - camelCase property names.
 - Every constructor property is required; nullable properties are written and must be present as `null`.
 - Unknown properties are rejected.
+- Arrays never contain `null`. Nullable annotations do not cover collection elements, so each DTO with a list rejects a null element after deserialization through `IJsonOnDeserialized`.
 - Enums travel as fixed camelCase names set per member with `JsonStringEnumMemberName`; numbers and unknown names are rejected through a strict string enum converter.
 - `RngStateDto` writes `seed`, `stream`, and `state` as 16-digit lowercase hexadecimal strings, because JSON numbers above 2^53 lose precision in JavaScript tools.
 - `RunId` is a standard GUID string; money values are JSON numbers.
@@ -241,7 +244,7 @@ All new code is written test-first.
 | `StreamerName` | Accepts `NeonBorsuk`, `Cichy Kret`, `Zażółć_gęślą-1`, and two-letter names; normalizes NFD to NFC and trims; rejects one character, 33 characters, double or edge spaces, control characters, emoji, symbols, names without a letter or digit, and over-long combining sequences |
 | `GameParametersValidator` | The first published values pass; each published rule fails on its boundary |
 | `RunStateValidator` | Valid fixtures for each of the five statuses; for every error code, the smallest change to a valid fixture produces that code; several errors are reported together; a valid result exposes a `ValidatedRunState` |
-| Wire format | Pending and terminal fixtures round-trip without change; exact JSON names for every enum value; hexadecimal generator fields; rejection of a missing property, a null in a non-nullable property, an unknown property, a numeric or unknown enum, and bad hexadecimal |
+| Wire format | Pending and terminal fixtures round-trip without change; exact JSON names for every enum value; hexadecimal generator fields; rejection of a missing property, a null in a non-nullable property, a null array element, an unknown property, a numeric or unknown enum, and bad hexadecimal |
 
 ## Documentation updates
 
