@@ -162,6 +162,19 @@ public sealed class WeekEngineTests
         Assert.Equal(2, state.Week);
     }
 
+    [Fact]
+    public void SubscriptionAloneCanRescueTheStep()
+    {
+        // -950 - 50 = -1,000 after the cost; the 1 PLN subscription from 10 viewers closes the step at -999.
+        ValidatedCatalog catalog = DraftCatalog.SingleAction(
+            RunStateFixtures.InDebtParameters with { StartingViewers = 10 }, costPln: 50, viewersDelta: 0, dramaDelta: 0);
+
+        RunState state = Plan(Start(catalog), catalog, TestAction);
+
+        Assert.Equal(RunStatus.Active, state.Status);
+        Assert.Equal(-999, state.MoneyPln);
+    }
+
     [Theory]
     [InlineData(50, RunStatus.Bankrupt, -1_000)]
     [InlineData(49, RunStatus.Active, -999)]

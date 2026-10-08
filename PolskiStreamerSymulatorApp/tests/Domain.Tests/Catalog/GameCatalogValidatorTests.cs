@@ -164,6 +164,7 @@ public sealed class GameCatalogValidatorTests
         Assert.Equal(50, action.GuaranteedCostPln);
         Assert.False(catalog.TryGetAction("streaming_marathon", out _));
         Assert.False(catalog.TryGetAction("Sponsor_Pitch", out _));
+        Assert.IsNotType<WeeklyActionDefinition[]>(catalog.WeeklyActions);
     }
 
     [Fact]

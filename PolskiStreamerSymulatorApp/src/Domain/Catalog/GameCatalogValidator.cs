@@ -65,7 +65,7 @@ public static class GameCatalogValidator
         }
 
         WeeklyActionDefinition[] copies = [.. catalog.WeeklyActions.Select(CopyAction)];
-        return CatalogValidation.Success(new ValidatedCatalog(catalog.Version, catalog.Parameters, copies));
+        return CatalogValidation.Success(new ValidatedCatalog(catalog.Version, catalog.Parameters, Array.AsReadOnly(copies)));
     }
 
     private static void ValidateOutcomes(IReadOnlyList<WeeklyActionOutcome> outcomes, string actionPath, List<CatalogError> errors)
