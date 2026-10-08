@@ -4,7 +4,7 @@
 | --- | --- |
 | Work package | F3 in the [delivery plan](../../delivery-plan.md) |
 | Date | 2026-10-07 |
-| Status | Design approved by the creator in conversation on 2026-10-07; this written spec awaits review. |
+| Status | Approved by the creator on 2026-10-07. |
 | Authoritative documents | [Testing strategy](../../testing-strategy.md), [deployment](../../deployment.md), [decisions](../../decisions.md) |
 
 This spec records how F3 will be built. The documents above stay authoritative for rules and contracts; this file does not replace them.
