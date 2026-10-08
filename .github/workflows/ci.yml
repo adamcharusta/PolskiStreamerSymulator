@@ -53,16 +53,17 @@ jobs:
       - name: Build image
         run: docker buildx build --platform linux/amd64 --file deploy/Dockerfile --tag "pss-ci:$GITHUB_SHA" --load .
       - name: Start container
+        id: start
         run: docker run --detach --name pss-ci --publish 8080:8080 "pss-ci:$GITHUB_SHA"
       - name: Wait for liveness
-        run: curl --fail --silent --show-error --output /dev/null --retry 30 --retry-delay 1 --retry-all-errors http://localhost:8080/health/live
+        run: curl --fail --silent --show-error --max-time 5 --output /dev/null --retry 30 --retry-delay 1 --retry-all-errors http://localhost:8080/health/live
       - name: Check readiness and client page
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --output /dev/null http://localhost:8080/health/ready
-          body=$(curl --fail --silent --show-error http://localhost:8080/)
-          grep --fixed-strings --quiet '<div id="app">' <<< "$body"
+          curl --fail --silent --show-error --max-time 5 --output /dev/null http://localhost:8080/health/ready
+          body=$(curl --fail --silent --show-error --max-time 5 http://localhost:8080/)
+          grep --fixed-strings --quiet '<div id="app">' <<< "$body" || { echo '::error::GET / did not contain <div id="app">'; exit 1; }
       - name: Print container logs
-        if: failure()
+        if: failure() && steps.start.conclusion == 'success'
         run: docker logs pss-ci
