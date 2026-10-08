@@ -16,7 +16,7 @@ Continuous integration runs the same commands. `.github/workflows/ci.yml` runs o
 
 | Project | References | Test purpose |
 | --- | --- | --- |
-| `tests/Domain.Tests` | `Domain` | Random generator, streamer names, parameter and run-state validation (in place since F2); later fast deterministic rules and property-style invariants |
+| `tests/Domain.Tests` | `Domain` | Random generator, streamer names, parameter and run-state validation (in place since F2); the weekly action engine, catalogue validation, run start, and weekly cash summary (since S1); later fast deterministic rules and property-style invariants |
 | `tests/Application.Tests` | `Application`, `Domain` | CQRS handler orchestration with fake ports and controlled RNG |
 | `tests/Infrastructure.IntegrationTests` | `Infrastructure`, `Application`, `Domain` | Real SQLite catalogue and analytics databases, migrations, draft validation, audit, and published-version behavior |
 | `tests/Server.IntegrationTests` | `Server`, `Contracts` | Health probe semantics and client hosting (in place since F1) and the contracts' JSON wire format (since F2); later the stateless gameplay HTTP contract, admin authentication and authorization, DI composition, Wolverine handler discovery, error mapping |
@@ -25,7 +25,7 @@ Continuous integration runs the same commands. `.github/workflows/ci.yml` runs o
 
 `Server.IntegrationTests` exists since work package F1 and `Domain.Tests` since F2. Add the other projects with the first behavior they verify.
 
-`Domain.Tests` and `Application.Tests` should run on every change. Provider and server integration tests should run in CI and before merging persistence or API changes. Browser E2E tests cover a few critical journeys, not every arithmetic branch. Balance sweeps can live in `Domain.Tests` under a separate trait and run before release or nightly, so a 1,000-seed test does not slow every edit.
+`Domain.Tests` and `Application.Tests` should run on every change. Provider and server integration tests should run in CI and before merging persistence or API changes. Browser E2E tests cover a few critical journeys, not every arithmetic branch. Balance sweeps live in `Domain.Tests` as explicit xUnit tests, which the default run and CI skip, so a 1,000-seed sweep does not slow every edit. Run them with `dotnet test --project tests/Domain.Tests/Domain.Tests.csproj --explicit only`; the first one, added in S1, writes `artifacts/balance/actions-only.md`.
 
 ## High-value test cases
 

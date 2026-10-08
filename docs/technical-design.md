@@ -64,6 +64,18 @@ F2 implements the run state in `Domain` (`Runs`, `Ledger`, `Randomness`, `Catalo
 
 **Problem codes.** `ProblemCodes` in `Contracts` lists the stable codes that API Problem Details responses use: `invalid_request`, `invalid_state`, `invalid_choice`, `invalid_streamer_name`, `incompatible_save`, `catalog_version_unavailable`, and `run_finished`.
 
+### Weekly action engine
+
+S1 implements the weekly action step in `Domain` (`Catalog`, `Engine`, `Runs`). The design record is `docs/superpowers/specs/2026-10-08-s1-weekly-action-engine-design.md`.
+
+**Validated catalogue.** `GameCatalogValidator.Validate` checks a `GameCatalog`, which holds the version, the parameters, and the enabled weekly actions in catalogue order. It returns every error with a stable code and a path, or a `ValidatedCatalog`, which only the validator creates, from its own copies of the lists. It checks what the engine relies on: stable and unique IDs, at least one action with at least one outcome, chances from 0 to 10,000 that sum to exactly 10,000, cash flows that are sponsors, donations, or expenses, and the engine limits. Publication policy stays with S2, which runs the same validator first.
+
+**Planning a week.** `WeekEngine.PlanWeek` takes a `ValidatedRunState`, the `ValidatedCatalog` of its pinned version, and an action ID. It returns the next `ValidatedRunState`, or one error code: `catalog_mismatch`, `week_pending`, `run_finished`, `unknown_action`, or `value_out_of_range`. It records the guaranteed cost, draws one roll, applies the outcome's cash flows and clamped deltas, and settles the subscription; only then does it check bankruptcy. Until S3 adds events, the week then ends in bankruptcy, in completion at the final week, or with the next active week. `OutcomeTable` selects outcomes by running sum in catalogue order, and `SubscriptionSettlement` holds the rules-version-1 formula.
+
+**Starting and reporting.** `RunStarter.Start` builds the week-1 state from the catalogue's parameters, a run ID, a normalized streamer name, and a seed and stream, and validates it. `WeekCashSummary.For` returns a week's opening money, its four category totals, and its closing money for the weekly report.
+
+**Engine limits.** Catalogue amounts are at most 1,000,000,000 PLN per entry, and viewer changes at most 1,000,000 per outcome. These are arithmetic guards, not balance rules. Only an edited save can reach a week whose money or viewers would not fit their 64-bit and 32-bit types; such a week fails with `value_out_of_range`.
+
 ## Localization boundary
 
 The first version supports `pl-PL` and `en`. Keep localized UI resources in `BlazorApp` and localized action/event text in the SQLite catalogue's per-locale rows described in [event system](event-system.md). API queries for setup and pinned catalogue text accept a supported locale; the simulation commands and saved run state use stable IDs and numbers, not localized strings. Switching language fetches the same pinned catalogue version in the other locale and does not consume a roll, alter a save, or restart the run. Polish is the confirmed default; provide a visible English switch and save the UI language preference separately from career slots. Publication requires both locales for every enabled text-bearing item, including risk previews and results. Format money as PLN in both locales.

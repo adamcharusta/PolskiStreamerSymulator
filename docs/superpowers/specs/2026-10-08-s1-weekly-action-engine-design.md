@@ -4,7 +4,7 @@
 | --- | --- |
 | Work package | S1 in the [delivery plan](../../delivery-plan.md) |
 | Date | 2026-10-08 |
-| Status | Design approved by the creator in conversation on 2026-10-08; this written spec awaits review. |
+| Status | Approved by the creator on 2026-10-08. |
 | Authoritative documents | [Balance](../../balance.md), [game design](../../game-design.md), [event system](../../event-system.md), [technical design](../../technical-design.md), [testing strategy](../../testing-strategy.md) |
 
 This spec records how S1 will be built. The documents above stay authoritative for rules and contracts; this file does not replace them.
@@ -109,7 +109,7 @@ These limits guard the engine's arithmetic. They are not balance decisions, and 
 
 `OutcomeTable.Select(IReadOnlyList<WeeklyActionOutcome> outcomes, int roll)` walks the outcomes in catalogue order with a running sum of `ChanceBps`. It returns the first outcome whose running sum exceeds the roll, so an outcome with a chance of 0 is never chosen.
 
-- It requires a roll of 0 to 9,999 and a table that sums to 10,000; otherwise it throws `ArgumentOutOfRangeException`. A validated catalogue and `Pcg32.NextRoll` always meet both conditions.
+- It requires a roll of 0 to 9,999 and a table of non-negative chances that sums to 10,000. An invalid roll throws `ArgumentOutOfRangeException`, and an invalid table throws `ArgumentException`. A validated catalogue and `Pcg32.NextRoll` always meet both conditions.
 - S3 will reuse the same running-sum rule for event responses, through an overload or a generic form.
 
 For `regular_stream`, rolls 0 to 5,999 select `steady`, 6,000 to 8,999 select `good_chat`, and 9,000 to 9,999 select `slow_evening`.

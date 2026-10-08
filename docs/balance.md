@@ -12,7 +12,7 @@ The creator confirmed the three-statistic model, initial starting values, bankru
 
 The first `RunLengthWeeks` is **52**. The server and UI read it from the run's pinned parameters; they do not treat week 52 as a permanent code constant. The first starting money, viewers, and drama values are likewise read from that row. The [SQLite game catalogue](event-system.md) lists every typed configurable field and its validation.
 
-The previous draft's one average live viewer, energy, trust, reputation, and equipment level are retired. Do not implement them as hidden replacement statistics. For first-pass event eligibility, **provisional** bands are 0–33 calm, 34–66 middle, and 67–100 high drama; the first two upper boundaries come from the pinned `GameParameters` row. An event can target one or more bands and add money/viewer requirements. Clamp viewers at zero and drama to 0–100 after each completed outcome. Money has no arbitrary upper cap.
+The previous draft's one average live viewer, energy, trust, reputation, and equipment level are retired. Do not implement them as hidden replacement statistics. For first-pass event eligibility, **provisional** bands are 0–33 calm, 34–66 middle, and 67–100 high drama; the first two upper boundaries come from the pinned `GameParameters` row. An event can target one or more bands and add money/viewer requirements. Clamp viewers at zero and drama to 0–100 after each completed outcome. Money has no arbitrary upper cap; the engine only rejects a week whose money or viewers would not fit their 64-bit and 32-bit types, which an ordinary career cannot reach.
 
 ## Bankruptcy limit
 
@@ -25,7 +25,7 @@ Treat the weekly action, its rolled outcome, and the regular subscription settle
 1. Validate that a weekly action or event response is available. The player may pay its guaranteed cost using debt even if current money is below the cost or the cost temporarily crosses the pinned bankruptcy threshold. An automatic event encounter cost is unavoidable after that event is selected and may create debt or end the run immediately.
 2. Record any stated weekly-action or response cost as an expense and subtract it once before that choice's outcome roll. A cost is not a random consequence.
 3. Read the choice's immutable, ordered outcomes. Their `ChanceBps` values must sum to exactly 10,000; each value is an integer from 0 to 10,000.
-4. Consume one value in `[0, 9999]` from the saved seeded PRNG: the unbiased bounded draw of the PCG32 generator with bound 10,000. Select the outcome whose cumulative interval contains that value. Apply its categorized cash-flow entries and viewer/drama deltas once.
+4. Consume one value in `[0, 9999]` from the saved seeded PRNG: the unbiased bounded draw of the PCG32 generator with bound 10,000. Select the outcome whose cumulative interval contains that value: outcomes are taken in catalogue order, and the first one whose running sum of chances exceeds the roll is selected, so an outcome with a chance of 0 is never selected. Apply its categorized cash-flow entries and viewer/drama deltas once.
 5. Record the pre-choice state, choice ID, roll, outcome ID, cash-flow entries, and actual deltas in the report and browser save. A retry with the same state and choice returns the same result.
 
 ## Cash-flow accounting
@@ -125,3 +125,5 @@ For early simulations, track at least:
 - Percentage of runs reaching week 52 versus ending in bankruptcy or a special outcome, plus the week and cause of each early ending. Check whether unavoidable encounter costs create unfair losses.
 
 Tune exact odds and deltas against these results and human playtests. Keep the same seeded scenarios when comparing revisions.
+
+Since S1, an action-only sweep gives a first look at the weekly actions before events exist. `tests/Domain.Tests/Balance/ActionOnlySweepTests.cs` plays 1,000 seeded 52-week careers for each of five strategies: always each of the four actions, and a uniform random choice. It writes the bankruptcy share, the drama-band share, the average weekly cash per category, and money and viewer percentiles at weeks 1, 13, 26, and 52 to `PolskiStreamerSymulatorApp/artifacts/balance/actions-only.md`. Run it from `PolskiStreamerSymulatorApp/` with `dotnet test --project tests/Domain.Tests/Domain.Tests.csproj --explicit only`. Without events, its numbers are not a balance verdict.
