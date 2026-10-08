@@ -65,8 +65,7 @@ Chosen by the creator during brainstorming on 2026-10-08:
 | --- | --- | --- |
 | `Domain` | `Catalog` | `GameCatalog`, `GameCatalogValidator`, `CatalogValidation`, `ValidatedCatalog`, `CatalogError`, `CatalogErrorCodes` |
 | `Domain` | `Engine` | `WeekEngine`, `WeekPlanResult`, `WeekPlanErrorCodes`, `OutcomeTable`, `SubscriptionSettlement` |
-| `Domain` | `Runs` | `RunStarter` |
-| `Domain` | `Ledger` | `WeekCashSummary` |
+| `Domain` | `Runs` | `RunStarter`, `WeekCashSummary`; the summary takes a `ValidatedRunState`, so it lives beside it rather than in `Ledger`, which `Runs` already depends on |
 | `tests/Domain.Tests` | `Catalog`, `Engine`, `Runs`, `Ledger`, `Balance` | Unit tests, a draft catalogue fixture, a structural state comparer, and the explicit balance sweep |
 
 Domain keeps no package or project references.
@@ -181,6 +180,7 @@ The name is normalized with `StreamerName.TryNormalize`. If normalization fails,
 - **Closing money:** opening + sponsors + donations + subscriptions - expenses.
 - **Week range:** the week must have a record in `History` or `CurrentWeek`; otherwise the method throws `ArgumentOutOfRangeException`.
 - **Pending week:** for a `PendingWeek` run, the summary covers the week so far.
+- **Overflow:** the totals are summed in 128-bit arithmetic. If an edited save holds entries whose totals do not fit in 64 bits, the method throws `OverflowException` instead of returning wrapped totals.
 
 ## Testing
 
