@@ -42,6 +42,8 @@ GitHub Actions -- SSH 22 --> restricted deploy account --> local k3s kubectl
 | `.github/workflows/ci.yml` | On a push to any branch and on a pull request into `main`: format check, Release build, tests, and a container build that must start and answer `/health/live`, `/health/ready`, and the client page. It publishes nothing and uses no secrets. |
 | `deploy/Dockerfile` | .NET 10 multi-stage publish of `Server`, started as `PolskiStreamerSymulatorApp.Server.dll` on port 8080. `.dockerignore` keeps the local `artifacts` build folder out of the build context. |
 
+Workflow maintenance follow-ups, recorded after the first CI run on 2026-10-08: `actions/checkout` v4.2.2 and `actions/setup-dotnet` v4.3.1 target Node.js 20, which GitHub has deprecated and currently forces onto Node.js 24; update both pins together in `ci.yml` and `deploy.yml`. Both workflows run on `ubuntu-latest`, which moves to Ubuntu 26 from 2026-10-19; the first CI run after that date is the check, and `deploy.yml` has not yet run on either image. When S2 tags the published-catalogue check as `ready`, give the CI readiness probe the same retry as the liveness probe, because readiness can briefly return 503 after liveness succeeds.
+
 ## Provisioning sequence
 
 1. Point the public and admin DNS names to the VPS. Check that no existing service needs TCP 80/443 and that the provider firewall permits 22/80/443. Prepare a console or recovery path from the VPS provider before changing SSH/firewall settings.

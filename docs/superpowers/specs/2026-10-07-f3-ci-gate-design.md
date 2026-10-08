@@ -92,7 +92,7 @@ Steps:
 
    This matches the deploy workflow's build command apart from publishing.
 3. Start the container in the background: `docker run -d --name pss-ci -p 8080:8080 pss-ci:<sha>`.
-4. Poll `http://localhost:8080/health/live` with `curl --fail` for up to 30 seconds, until it returns 200.
+4. Poll `http://localhost:8080/health/live` with `curl --fail`, each attempt capped at 5 seconds, for up to 30 attempts, until it returns a successful response.
 5. Then require status 200 from:
    - `/health/ready`;
    - `/`, whose body must contain `<div id="app">`, the same marker the F1 client-hosting test checks.
@@ -131,6 +131,6 @@ A workflow cannot be developed test-first the way code can. Verification therefo
 ## Risks
 
 - **First real run of the pinned actions.** `deploy.yml` has never run, so `ci.yml` is the first workflow to use these action pins and the `global-json-file` SDK install on GitHub. The first GitHub run is the check. If an action fails, update its pin in `ci.yml` and record the follow-up for `deploy.yml`.
-- **SDK version drift.** `global.json` pins 10.0.201 with `rollForward: latestFeature`. `actions/setup-dotnet` installs the matching SDK, so the runner's preinstalled SDKs do not matter. A newer feature band can bring new analyzer warnings. If one fails the build, it gets fixed as an ordinary code change.
+- **SDK version drift.** `global.json` requests 10.0.201 with `rollForward: latestFeature`. `actions/setup-dotnet` turns that request into the `10.0` channel and installs its newest SDK, or keeps it when the runner already has it; the first run used the preinstalled 10.0.401. CI therefore follows the newest .NET 10 SDK rather than 10.0.201 exactly, as the Docker build does through the `sdk:10.0` image and as local machines do under `latestFeature`. A newer SDK can bring new analyzer warnings without any commit. If one fails the build, it gets fixed as an ordinary code change. (Corrected on 2026-10-08 after the first GitHub run.)
 - **Format check across platforms.** `dotnet format` on Linux could disagree with a Windows checkout if line endings drift. `.gitattributes` enforces LF on checkout, which limits the risk. The clean-clone rehearsal runs on Windows, so the first GitHub run is the first Linux check. A disagreement found there is fixed in code, not by weakening the check.
 - **Container startup time.** The 30-second poll is generous for this Server today. Later packages that add database startup work may need a longer wait. Raise the limit then, rather than removing the check.
