@@ -142,7 +142,7 @@ Insufficient cash is never an error, because paid actions may use debt.
 5. Settle the subscription from the post-action viewers, and add `(w, 0, Subscription, 0, Subscriptions, amount)`, even when the amount is 0.
 6. New money is the old money plus every signed entry of the step, computed in 128-bit arithmetic.
    - If new money does not fit in `long`, or new viewers exceed `int.MaxValue`, return `value_out_of_range` and no state.
-   - A real career cannot approach these bounds; only an edited save can.
+   - An ordinary career cannot approach these bounds; an edited save can, and so can a catalogue whose starting values sit near the type limits.
 
 **Week completion**, a separate private step. S3 will insert the event phase before it.
 
@@ -257,3 +257,14 @@ A test helper compares run states structurally: records field by field, and list
 - **The engine limits are arbitrary.** They prevent overflow and say nothing about balance. Raising them later is a rules change only if saved states could already exceed them, which a real career cannot.
 - **S3 changes the end of `PlanWeek`.** Week completion is a separate step, so S3 inserts the event phase before it. Encounter rolls then draw from the same generator after the action roll, which keeps a week's roll order stable.
 - **Catalogue order affects rolls.** A different outcome order changes which roll selects which outcome. S2 must persist and load the order exactly; the event-system update states this.
+
+## Carry-forward to S2, S3, and S4
+
+- S2: bound `StartingMoneyPln`, `StartingViewers`, and `BankruptcyThresholdPln` at publication so that no published catalogue can start a run that fails with `value_out_of_range`.
+- S2: persist an explicit outcome order, and pass outcomes to `GameCatalog` in that order.
+- S2: sum the `WeeklyActionEffect` rows of an outcome into `ViewersDelta` and `DramaDelta` with checked arithmetic, before `GameCatalogValidator` applies its limits.
+- S2: the loader never yields null lists, elements, or IDs; `GameCatalogValidator` assumes non-null input.
+- S3: make `OutcomeTable.Select` generic, or add an overload, for event responses; add the high-sum, negative-chance, and empty-table rejection tests then.
+- S3: move the bankruptcy check to the end of the action step; the event phase runs between that check and week completion, and a bankrupt action step stops before events.
+- S3: extend the purity test to `Flags` once events change them.
+- S4: catch `OverflowException` from `WeekCashSummary.For`, which a validated but edited save can trigger, and map it to `invalid_state` instead of a server error.

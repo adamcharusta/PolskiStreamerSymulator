@@ -7,7 +7,8 @@ namespace PolskiStreamerSymulatorApp.Domain.Engine;
 
 /// <summary>
 /// Plays one week of a validated run against its pinned, validated catalogue. The same inputs always give the same result,
-/// an error leaves no partial change, and the input lists are never mutated or kept.
+/// an error leaves no partial change, the input's lists are never mutated, and the new state gets new top-level lists;
+/// finished week records are shared with the input because they never change.
 /// Until S3 adds events, a week ends straight after its weekly action step.
 /// </summary>
 public static class WeekEngine
@@ -93,7 +94,8 @@ public static class WeekEngine
     }
 
     /// <summary>
-    /// Records a finished week and decides what comes next. S3 inserts the event phase before this step.
+    /// Records a finished week and decides what comes next. S3 moves the bankruptcy check to the end of the action step,
+    /// then inserts the event phase between that check and this step.
     /// </summary>
     private static RunState CompleteWeek(
         RunState state,
